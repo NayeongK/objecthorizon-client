@@ -1,53 +1,61 @@
-import React, { useEffect, useRef } from "react";
-import imageSrc from "../../assets/0-earth-nasa-vhSz50AaFAs-unsplash.jpg";
+import React, { useEffect, useState, useRef } from "react";
+import { fetchData } from "../../utils/image";
 
 function ImageLayout() {
   const canvasRef = useRef(null);
-  const image = new Image();
-  image.src = imageSrc;
+  const zoomRef = useRef(1);
+  const [images, setImages] = useState([]);
+  const [currentImage, setCurrentImage] = useState(null);
+
+  useEffect(() => {
+    async function loadImages() {
+      const fetchedData = await fetchData(0, 10);
+      setImages(fetchedData);
+      setCurrentImage(fetchedData[0]);
+    }
+    loadImages();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      const image = new Image();
 
-      const imgRatio = image.width / image.height;
-      const canvasRatio = canvas.width / canvas.height;
+      image.onload = () => {
+        const canvasWidth = window.innerWidth;
+        const canvasHeight = window.innerHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
 
-      let renderHeight, renderWidth;
+        const imgRatio = image.width / image.height;
+        const canvasRatio = canvasWidth / canvasHeight;
 
-      if (canvasRatio < imgRatio) {
-        renderHeight = canvas.height;
-        renderWidth = canvas.height * imgRatio;
-      } else {
-        renderWidth = canvas.width;
-        renderHeight = canvas.width / imgRatio;
+        let drawWidth, drawHeight;
+
+        if (imgRatio > canvasRatio) {
+          drawWidth = canvasWidth;
+          drawHeight = canvasWidth / imgRatio;
+        } else {
+          drawHeight = canvasHeight;
+          drawWidth = canvasHeight * imgRatio;
+        }
+
+        const startX = (canvasWidth - drawWidth) / 2;
+        const startY = (canvasHeight - drawHeight) / 2;
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
+      };
+
+      if (currentImage) {
+        image.src = currentImage.url;
       }
-
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.drawImage(
-        image,
-        (canvas.width - renderWidth) / 2,
-        (canvas.height - renderHeight) / 2,
-        renderWidth,
-        renderHeight,
-      );
     }
-
-    image.onload = () => {
-      window.addEventListener("resize", resizeCanvas);
-      resizeCanvas();
-    };
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, [image]);
+  }, [currentImage, canvasRef]);
 
   return (
     <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0 }} />
