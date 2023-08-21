@@ -1,9 +1,9 @@
-export async function fetchData(offset, limit) {
+const { VITE_SERVER_URI } = import.meta.env;
+
+export async function fetchAllBackgroundImages() {
   try {
-    const data = await fetch(
-      `http://localhost:3000/images?offset=${offset}&limit=${limit}`,
-    );
-    const { images } = await data.json();
+    const data = await fetch(`${VITE_SERVER_URI}/images?initial=true`);
+    const images = await data.json();
     return images;
   } catch (error) {
     console.error("error", error);

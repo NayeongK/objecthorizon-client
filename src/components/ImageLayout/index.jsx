@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { fetchData } from "../../utils/fetchImages";
+import { fetchAllBackgroundImages } from "../../utils/fetchImages";
 
 function ImageLayout() {
   const canvasRef = useRef(null);
@@ -11,8 +11,8 @@ function ImageLayout() {
 
   useEffect(() => {
     async function loadImages() {
-      const fetchedData = await fetchData(0, 10);
-      setImages(fetchedData);
+      const fetchedImages = await fetchAllBackgroundImages();
+      setImages(fetchedImages);
     }
     loadImages();
   }, []);
@@ -30,12 +30,12 @@ function ImageLayout() {
     const ctx = canvas.getContext("2d");
     const image = new Image();
 
-    image.onload = () => {
+    image.addEventListener("load", () => {
       drawImage(canvas, ctx, image, zoom);
-    };
+    });
 
     if (images.length > 0) {
-      image.src = images[currentImageIndex].url;
+      image.src = images[currentImageIndex];
     }
   }, [images, currentImageIndex, zoom]);
 
@@ -63,13 +63,8 @@ function ImageLayout() {
     const canvasRatio = canvasWidth / canvasHeight;
     let drawWidth, drawHeight;
 
-    if (imgRatio > canvasRatio) {
-      drawWidth = canvasWidth * zoom;
-      drawHeight = (canvasWidth / imgRatio) * zoom;
-    } else {
-      drawHeight = canvasHeight * zoom;
-      drawWidth = canvasHeight * imgRatio * zoom;
-    }
+    drawWidth = canvasWidth * zoom;
+    drawHeight = drawWidth / imgRatio;
 
     const startX = (canvasWidth - drawWidth) / 2;
     const startY = (canvasHeight - drawHeight) / 2;
