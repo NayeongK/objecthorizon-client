@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { fetchAllBackgroundImages } from "../../utils/fetchImages";
+import { getDominantBackgroundColor } from "../../utils/getBackgroundColor";
+import { sendDominantColorToServer } from "../../utils/sendColorToServer";
 
 function ImageLayout() {
   const canvasRef = useRef(null);
@@ -8,6 +10,7 @@ function ImageLayout() {
   const [zoom, setZoom] = useState(1);
   const [startPinchDistance, setStartPinchDistance] = useState(null);
   const [startZoom, setStartZoom] = useState(null);
+  const [processedImages, setProcessedImages] = useState({});
 
   useEffect(() => {
     async function loadImages() {
@@ -26,23 +29,39 @@ function ImageLayout() {
   }, [zoom]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const image = new Image();
-
-    image.addEventListener("load", () => {
-      drawImage(canvas, ctx, image, zoom);
-    });
-
     if (images.length > 0) {
-      image.src = images[currentImageIndex];
+      processAllImages();
     }
-  }, [images, currentImageIndex, zoom]);
+  }, [images]);
+
+  async function processAllImages() {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    images.forEach(async (imgSrc) => {
+      if (!processedImages[imgSrc]) {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+
+        image.addEventListener("load", async () => {
+          canvas.width = image.width;
+          canvas.height = image.height;
+          ctx.drawImage(image, 0, 0);
+          const dominantBackgroundColor = getDominantBackgroundColor(canvas);
+          await sendDominantColorToServer(imgSrc, dominantBackgroundColor);
+          setProcessedImages((prevProcessedImages) => ({
+            ...prevProcessedImages,
+            [imgSrc]: true,
+          }));
+        });
+
+        image.src = imgSrc;
+      }
+    });
+  }
 
   function goToNextImage() {
-    setCurrentImageIndex((prevIndex) => {
-      return (prevIndex + 1) % images.length;
-    });
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
     setZoom(1);
   }
 
@@ -63,8 +82,13 @@ function ImageLayout() {
     const canvasRatio = canvasWidth / canvasHeight;
     let drawWidth, drawHeight;
 
-    drawWidth = canvasWidth * zoom;
-    drawHeight = drawWidth / imgRatio;
+    if (imgRatio > canvasRatio) {
+      drawWidth = canvasWidth * zoom;
+      drawHeight = drawWidth / imgRatio;
+    } else {
+      drawHeight = canvasHeight * zoom;
+      drawWidth = drawHeight * imgRatio;
+    }
 
     const startX = (canvasWidth - drawWidth) / 2;
     const startY = (canvasHeight - drawHeight) / 2;
