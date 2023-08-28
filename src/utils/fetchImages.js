@@ -9,3 +9,13 @@ export async function fetchAllBackgroundImages() {
     console.error("error", error);
   }
 }
+
+export async function fetchClosestBackgroundImage(color) {
+  try {
+    const data = await fetch(`${VITE_SERVER_URI}/images?color=${color}`);
+    const image = await data.json();
+    return image;
+  } catch (error) {
+    console.error("error", error);
+  }
+}
