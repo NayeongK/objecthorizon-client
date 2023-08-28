@@ -1,13 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
-import { fetchAllBackgroundImages } from "../../utils/fetchImages";
+import { useEffect, useState, useRef } from "react";
+import {
+  fetchAllBackgroundImages,
+  fetchClosestBackgroundImage,
+} from "../../utils/fetchImages";
 import { throttle } from "lodash";
 
 function ImageLayout() {
   const canvasRef = useRef(null);
   const [images, setImages] = useState([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
   const [viewState, setViewState] = useState({ imageIndex: 0, zoom: 1 });
+  const [sentColor, setSentColor] = useState(false);
 
   useEffect(() => {
     async function loadImages() {
@@ -16,6 +19,13 @@ function ImageLayout() {
     }
     loadImages();
   }, []);
+
+  useEffect(() => {
+    if (images[viewState.imageIndex + 1]) {
+      const nextImage = new Image();
+      nextImage.src = images[viewState.imageIndex + 1];
+    }
+  }, [images, viewState.imageIndex]);
 
   function goToNextImage() {
     setViewState((prevState) => ({
@@ -41,11 +51,24 @@ function ImageLayout() {
     let drawWidth = canvasWidth * zoomValue;
     let drawHeight = drawWidth / imgRatio;
 
-    const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
-    const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
+    let startX, startY;
 
-    const startX = (canvasWidth - drawWidth) / 2 - offsetX;
-    const startY = (canvasHeight - drawHeight) / 2 - offsetY;
+    if (zoomValue > 1) {
+      const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
+      const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
+
+      startX = (canvasWidth - drawWidth) / 2 - offsetX;
+      startY = (canvasHeight - drawHeight) / 2 - offsetY;
+
+      if (startX > 0) startX = 0;
+      if (startY > 0) startY = 0;
+      if (startX + drawWidth < canvasWidth) startX = canvasWidth - drawWidth;
+      if (startY + drawHeight < canvasHeight)
+        startY = canvasHeight - drawHeight;
+    } else {
+      startX = (canvasWidth - drawWidth) / 2;
+      startY = (canvasHeight - drawHeight) / 2;
+    }
 
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -55,14 +78,16 @@ function ImageLayout() {
   function handleWheel(e) {
     let scale = -e.deltaY * 0.01;
     let currentZoom = viewState.zoom;
-    const maxZoom = 400;
+    const maxZoom = 2000;
     const minZoom = 0.3;
 
     if (currentZoom * (1 + scale) > maxZoom) {
       goToNextImage();
       e.preventDefault();
       return;
-    } else if (currentZoom * (1 + scale) < minZoom) {
+    }
+
+    if (currentZoom * (1 + scale) < minZoom) {
       goToPreviousImage();
       e.preventDefault();
       return;
@@ -75,6 +100,35 @@ function ImageLayout() {
       zoom: newZoom,
     }));
     e.preventDefault();
+
+    if (newZoom > 600 && !sentColor) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const centerColor = ctx.getImageData(centerX, centerY, 1, 1).data;
+
+      async function fetchNextImage() {
+        const nextImage = await fetchClosestBackgroundImage(centerColor);
+        if (nextImage && nextImage.url) {
+          setImages((currentImages) => {
+            const updatedImages = [...currentImages, nextImage.url];
+            return updatedImages;
+          });
+          setViewState((currentViewState) => ({
+            imageIndex: images.length,
+            zoom: 1,
+          }));
+        }
+      }
+      fetchNextImage();
+      setSentColor(true);
+    }
+
+    if (newZoom <= 600) {
+      setSentColor(false);
+    }
   }
 
   const throttleHandler = throttle(handleWheel, 800);
@@ -99,6 +153,7 @@ function ImageLayout() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const image = new Image();
+    image.crossOrigin = "anonymous";
 
     image.addEventListener("load", () => {
       drawImage(canvas, ctx, image, viewState.zoom);
