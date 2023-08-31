@@ -3,7 +3,6 @@ import {
   fetchAllBackgroundImages,
   fetchClosestBackgroundImage,
 } from "../../utils/fetchImages";
-import { throttle } from "lodash";
 
 function ImageLayout() {
   const canvasRef = useRef(null);
@@ -11,18 +10,30 @@ function ImageLayout() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [viewState, setViewState] = useState({ imageIndex: 0, zoom: 1 });
   const [sentColor, setSentColor] = useState(false);
+  const [ticking, setTicking] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [animationFrameId, setAnimationFrameId] = useState(null);
 
   useEffect(() => {
     async function loadImages() {
+      setIsLoading(true);
       const fetchedImages = await fetchAllBackgroundImages();
       setImages(fetchedImages);
+      setIsLoading(false);
     }
     loadImages();
   }, []);
 
   useEffect(() => {
     if (images[viewState.imageIndex + 1]) {
+      setIsLoading(true);
       const nextImage = new Image();
+      nextImage.addEventListener("load", () => {
+        setIsLoading(false);
+      });
+      nextImage.addEventListener("onerror", () => {
+        setIsLoading(true);
+      });
       nextImage.src = images[viewState.imageIndex + 1];
     }
   }, [images, viewState.imageIndex]);
@@ -75,7 +86,7 @@ function ImageLayout() {
     ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
   }
 
-  function handleWheel(e) {
+  function handleWheelEvent(e) {
     let scale = -e.deltaY * 0.01;
     let currentZoom = viewState.zoom;
     const maxZoom = 2000;
@@ -131,7 +142,19 @@ function ImageLayout() {
     }
   }
 
-  const throttleHandler = throttle(handleWheel, 800);
+  function handleWheel(e) {
+    if (!ticking) {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+      const id = window.requestAnimationFrame(() => {
+        handleWheelEvent(e);
+        setTicking(false);
+      });
+      setAnimationFrameId(id);
+      setTicking(true);
+    }
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -141,11 +164,14 @@ function ImageLayout() {
     }
 
     canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("wheel", throttleHandler, { passive: false });
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
       canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("wheel", throttleHandler);
+      canvas.removeEventListener("wheel", handleWheel);
     };
   }, [viewState.zoom]);
 
