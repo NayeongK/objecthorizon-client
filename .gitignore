@@ -8,10 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+coverage
 dist
 dist-ssr
 *.local
 .env
+jest.setup.cjs
 
 # Editor directories and files
 .vscode/*
