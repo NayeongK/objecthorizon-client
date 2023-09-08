@@ -6,7 +6,7 @@ export async function fetchAllBackgroundImages() {
     const images = await data.json();
     return images;
   } catch (error) {
-    console.error("error", error);
+    throw error;
   }
 }
 
@@ -16,6 +16,6 @@ export async function fetchClosestBackgroundImage(color) {
     const image = await data.json();
     return image;
   } catch (error) {
-    console.error("error", error);
+    throw error;
   }
 }
