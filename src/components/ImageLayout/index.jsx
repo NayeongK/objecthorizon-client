@@ -193,6 +193,7 @@ function ImageLayout() {
   return (
     <canvas
       ref={canvasRef}
+      data-testid="canvas"
       style={{
         position: "fixed",
         top: 0,
