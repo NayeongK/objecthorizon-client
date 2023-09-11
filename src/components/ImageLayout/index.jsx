@@ -15,6 +15,20 @@ function ImageLayout() {
   const [animationFrameId, setAnimationFrameId] = useState(null);
 
   useEffect(() => {
+    function handleDocumentWheel(e) {
+      if (canvasRef.current && canvasRef.current.contains(e.target)) {
+        handleWheelEvent(e);
+      }
+    }
+
+    document.addEventListener("wheel", handleDocumentWheel, { passive: false });
+
+    return () => {
+      document.removeEventListener("wheel", handleDocumentWheel);
+    };
+  }, [viewState, images, setImages, sentColor]);
+
+  useEffect(() => {
     async function loadImages() {
       setIsLoading(true);
       const fetchedImages = await fetchAllBackgroundImages();
