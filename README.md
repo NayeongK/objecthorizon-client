@@ -43,6 +43,9 @@ const calculateDistance = (rgb1, rgb2) => {
 
 유클리드 거리 공식을 이용해서 RGB 색상 공간에서 두 색상 사이의 거리를 비교해서 가장 유사한 색을 찾을 수 있었습니다.
 
+<br />
+<br />
+
 # 2. 효율적으로 DB를 탐색할 수 있을까?
 
 ## 2-1. 부분 탐색으로도 정확한 조회가 가능하도록 커스텀 탐색 로직 구현
@@ -61,11 +64,11 @@ R, G, B 값은 0부터 255까지로 표현됩니다. 이 R, G, B 값을 축으�
 
 R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차원 공간을 총 몇개의 구역으로 나누는지를 계산했습니다. 그리고 사진의 분포가 일정하다는 가정 하에 한 구역당 몇 개의 사진이 들어갈 지 계산했습니다.
 
-|       | 총 구역의 갯수 | 한 구역 당 사진 수 |
-| ----- | -------------- | ------------------ |
-| 5등분 | 5*5*5 = 125    | 678/125 = 5장      |
-| 6등분 | 6*6*6 = 216    | 678/216 = 3장      |
-| 7등분 | 7*7*7 = 343    | 678/343 = 2장      |
+|       | 총 구역의 갯수               | 한 구역 당 사진 수   |
+| ----- | ---------------------------- | -------------------- |
+| 5등분 | $$5 \times 5 \times5 = 125$$ | $678 \div 125 = 5$장 |
+| 6등분 | $$6 \times 6 \times6 = 216$$ | $678 \div 216 = 3$장 |
+| 7등분 | $$7 \times 7 \times7 = 343$$ | $678 \div 343 = 2$장 |
 
 5등분씩 나누게 되면, 인접 구역 내에 사진이 많아져서, 거리 연산 횟수가 많아집니다.
 
@@ -103,6 +106,9 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
   <img src="https://file.notion.so/f/f/a499d1d5-780e-48e4-b285-a43f40cdb1e5/934e8c21-c705-4842-9adf-2d0f0088a1d5/Untitled.png?id=36cc8416-b616-4c98-846d-4e1645a52bbe&table=block&spaceId=a499d1d5-780e-48e4-b285-a43f40cdb1e5&expirationTimestamp=1701331200000&signature=8r4evFxppMQXUdpoX1yOkYEifQlDvNU3Tpck5C-vsAA&downloadName=Untitled.png" width="300" />
   <img src="https://file.notion.so/f/f/a499d1d5-780e-48e4-b285-a43f40cdb1e5/b9b96be5-1bee-481f-a57e-66663561c46b/Untitled.png?id=1aadd70c-a1ea-4f64-b746-883565d895b0&table=block&spaceId=a499d1d5-780e-48e4-b285-a43f40cdb1e5&expirationTimestamp=1701331200000&signature=-_NGZ-iQ9GC9nnFueZi6F4osuxq_bZhWpV5fdcSPtZM&downloadName=Untitled.png" width="300" />
 
+<br />
+<br />
+
 # 3. 탐색 로직 최적화하기
 
 ## 3-1. 기존 탐색 로직의 문제점
@@ -126,7 +132,9 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 이와 같이 상대적으로 밀도가 높은 구역에는 탐색 시간이 많이 소요되게 되고, 밀도가 낮은 구역의 경우에는 탐색 시간이 적게 소요됩니다 .
 
 <img src="https://file.notion.so/f/f/a499d1d5-780e-48e4-b285-a43f40cdb1e5/fed62fa1-cd51-4ef7-b4d8-ee3012261b5e/Untitled.png?id=e0bac806-5ceb-4587-bf6c-ae112f0cd377&table=block&spaceId=a499d1d5-780e-48e4-b285-a43f40cdb1e5&expirationTimestamp=1701331200000&signature=RvIdhy0DF_1Bmn5OV8Ft-Im7xCnbeNze8g9z5on190c&downloadName=Untitled.png" width="300" />
-위 사진은 실제로 탐색 시간을 측정한 결과입니다. 적게는 258에서부터 많게는 516까지 탐색 시간의 분포가 일관되지 않은 것을 볼 수 있습니다. 이 예시에서는 표준편차가 78.84로 계산 되었습니다. 이 처럼 탐색 시간이 일관되지 않다면, 탐색 결과의 신뢰성이 보장되지 않습니다.
+
+위 사진은 실제로 탐색 시간을 측정한 결과입니다. 적게는 258에서부터 많게는 516까지 탐색 시간의 분포가 일관되지 않은 것을 볼 수 있습니다.
+이 예시에서는 표준편차가 78.84로 계산 되었습니다. 이 처럼 탐색 시간이 일관되지 않다면, 탐색 결과의 신뢰성이 보장되지 않습니다.
 
 ## 3-2. 자료구조를 적용해서 탐색의 일관성을 높인다.
 
@@ -148,6 +156,9 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 
 소요시간의 표준편차는 26.46으로, 기존 방법의 표준편차 78.84에 비해 표준 편차가 감소했습니다. 적절한 자료구조로 변경하여 결과값의 일관성이 높아지면서 결과의 신뢰성도 높일 수 있게 되었습니다.
 
+<br />
+<br />
+
 # 4. 부드러운 이미지 확대 효과
 
 ## 4-1. 어떻게 사진을 자연스럽게 확대할까?
@@ -159,6 +170,9 @@ throttle vs requestAnimationFrame 비교
 마우스가 위치한 사진의 지점이 확대되도록 하는 방법
 
 ## 4-3. 확대와 축소에서의 사용자 경험 증대
+
+<br />
+<br />
 
 # 5. 자동화 스크립트로 사진 색상을 추출하고 저장
 
@@ -176,45 +190,48 @@ throttle vs requestAnimationFrame 비교
 
 가장자리의 픽셀값을 사용해서 가장 빈도가 높은 색상을 대표 색상으로 추출하는 로직을 구현했습니다.
 
-- 가장자리 픽셀 추출 로직
+<details>
+<summary>가장자리 픽셀 추출 로직</summary>
 
-  ```jsx
-  const getDominantBackgroundColor = function (canvas) {
-    const ctx = canvas.getContext("2d");
-    const edgePixels = [];
-    const width = canvas.width;
-    const height = canvas.height;
+```jsx
+const getDominantBackgroundColor = function (canvas) {
+  const ctx = canvas.getContext("2d");
+  const edgePixels = [];
+  const width = canvas.width;
+  const height = canvas.height;
 
-    for (let x = 0; x < width; x++) {
-      edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
-      edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
+  for (let x = 0; x < width; x++) {
+    edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
+    edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
+  }
+
+  for (let y = 0; y < height; y++) {
+    edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
+    edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
+  }
+
+  const colorCounts = {};
+
+  edgePixels.forEach((pixel) => {
+    const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
+    if (!colorCounts[key]) {
+      colorCounts[key] = 0;
     }
+    colorCounts[key]++;
+  });
 
-    for (let y = 0; y < height; y++) {
-      edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
-      edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
+  let dominantColor = null;
+  let maxCount = 0;
+
+  Object.keys(colorCounts).forEach((key) => {
+    if (colorCounts[key] > maxCount) {
+      dominantColor = key;
+      maxCount = colorCounts[key];
     }
+  });
 
-    const colorCounts = {};
+  return dominantColor ? dominantColor.split("-").map(Number) : null;
+};
+```
 
-    edgePixels.forEach((pixel) => {
-      const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
-      if (!colorCounts[key]) {
-        colorCounts[key] = 0;
-      }
-      colorCounts[key]++;
-    });
-
-    let dominantColor = null;
-    let maxCount = 0;
-
-    Object.keys(colorCounts).forEach((key) => {
-      if (colorCounts[key] > maxCount) {
-        dominantColor = key;
-        maxCount = colorCounts[key];
-      }
-    });
-
-    return dominantColor ? dominantColor.split("-").map(Number) : null;
-  };
-  ```
+</details>
