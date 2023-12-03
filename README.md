@@ -180,6 +180,15 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 ## 4-1. 어떻게 사진을 자연스럽게 확대할까?
 
 throttle vs requestAnimationFrame 비교
+<br />
+![throttle](https://github.com/NayeongK/objecthorizon-client/assets/80331804/f78ca1c7-dac4-4ee3-b1b8-84c82038e3fa)
+<br />
+throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스럽거나 끊기는 현상이 발생합니다.
+<br />
+<br />
+![rAF](https://github.com/NayeongK/objecthorizon-client/assets/80331804/a89d17da-d273-478d-974e-f57546ba180d)
+<br />
+requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
 
 ## 4-2. 확대 시점을 어떻게 계산할까?
 
