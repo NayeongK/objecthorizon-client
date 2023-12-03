@@ -80,7 +80,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 
 `7등분`씩 나누게 되면, 한 구역에 사진이 없을 확률도 높아지고, 인접하는 구역 내에 사진이 없을 확률도 존재합니다. 즉, 가장 유사한 사진을 검색할 수 없을 확률이 존재합니다.
 
-따라서 전체 R, G, B를 각각 `6등분`으로 나누었습니다. 밀도의 불균일성을 고려 하더라도 한 구역에 1개 이상 있을 확률이 높다고 판단했습니다. 아래 사진을 보면 6개씩의 구역으로 나누었을 때의 DB의 분포를 볼 수 있습니다. 이 사진에서도 대부분의 구역에 데이터가 존재하는 것을 볼 수 있습니다.
+따라서 전체 R, G, B를 각각 `6등분`으로 나누었습니다. 밀도의 불균일성을 고려하더라도 한 구역에 1개 이상 있을 확률이 높다고 판단했습니다. 아래 사진을 보면 6개씩의 구역으로 나누었을 때의 DB의 분포를 볼 수 있습니다. 이 사진에서도 대부분의 구역에 데이터가 존재하는 것을 볼 수 있습니다.
 
 <img width="300" alt="3d 산점도" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/9d23b183-9b50-4c82-9c60-403f87cc16e2">
 
@@ -185,7 +185,6 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 적절한 자료구조로 변경하여 결과값의 일관성이 높아지면서 결과의 신뢰성도 높일 수 있게 되었습니다.
 
 <br />
-<br />
 
 # 4. 부드러운 이미지 확대 효과
 
@@ -272,21 +271,30 @@ function handleWheelEvent(e) {
 
 ```javascript
 function drawImage(canvas, ctx, image, zoomValue) {
+  // 캔버스의 너비와 높이를 브라우저 창의 크기로 설정
   const canvasWidth = window.innerWidth;
   const canvasHeight = window.innerHeight;
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
 
+  // 이미지의 비율을 계산
   const imgRatio = image.width / image.height;
+
+  // 확대/축소된 이미지의 너비를 계산
   let drawWidth = canvasWidth * zoomValue;
+  // 확대/축소된 이미지의 높이를 이미지 비율에 맞추어 계산
   let drawHeight = drawWidth / imgRatio;
 
+  // 마우스 위치를 기준으로 이미지의 X, Y 시작점을 계산
   const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
   const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
 
+  // 이미지가 캔버스 중앙에 위치하도록 X 시작점을 계산하고, 마우스 위치에 따라 조정한다
   let startX = (canvasWidth - drawWidth) / 2 - offsetX;
+  // 이미지가 캔버스 중앙에 위치하도록 Y 시작점을 계산하고, 마우스 위치에 따라 조정한다
   let startY = (canvasHeight - drawHeight) / 2 - offsetY;
 
+  // 이미지가 캔버스를 벗어나지 않도록 X,Y 시작점을 조정한다
   if (startX > 0) {
     startX = 0;
   }
@@ -300,6 +308,7 @@ function drawImage(canvas, ctx, image, zoomValue) {
     startY = canvasHeight - drawHeight;
   }
 
+  // 계산된 시작점과 크기로 캔버스에 이미지를 그린다
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
@@ -322,6 +331,45 @@ function drawImage(canvas, ctx, image, zoomValue) {
 offsetX와 offsetY는 마우스 위치를 기준으로 확대할 때 이미지가 얼마나 이동해야 하는지를 나타냅니다.
 startX와 startY는 이미지가 캔버스에 그려질 시작 위치입니다. 이는 확대 중심점을 기준으로 계산됩니다.
 이미지가 캔버스 밖으로 나가지 않도록 경계값을 체크합니다.
+
+<details>
+<summary> offset X,Y와 startX, Y의 계산</summary>
+
+### 마우스 위치에 기반한 오프셋 계산 (offsetX, offsetY)
+
+마우스 위치 오프셋 계산 (offsetX, offsetY)
+
+1. 마우스 위치 계산
+   마우스가 캔버스 중앙으로부터 얼마나 멀리 위치해 있는지를 나타냅니다.
+   마우스의 x좌표에서 캔버스 너비의 절반을 빼면, x좌표가 캔버스 중앙으로부터 얼마나 멀리 위치해있는지 알 수 있습니다. 같은 방법으로 y도 중앙으로부터 얼마나 멀리 위치해있는지 구할 수 있습니다.
+
+   ```
+   mousePosition.x - canvasWidth / 2
+   mousePosition.y - canvasHeight / 2
+   ```
+
+2. 확대 비율을 곱해서 확대 정도에 따른 마우스의 위치를 구하기
+
+   ```
+   const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
+   const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
+   ```
+
+   마우스 위치에 따른 X축 오프셋에 확대/축소 비율을 적용합니다. 확대 정도에 따라 마우스 위치에서 이미지가 얼마나 멀리 이동해야 할지를 결정 하도록 합니다.
+   예를 들어, 확대가 클수록 (zoomValue가 크면), 마우스 위치에서 멀어지는 정도도 커지며, 이미지는 마우스 위치를 중심으로 더 넓게 확대됩니다.
+
+### 이미지 시작점 계산 (startX, startY)
+
+```
+startX = (canvasWidth - drawWidth) / 2 - offsetX
+startY = (canvasHeight - drawHeight) / 2 - offsetY
+```
+
+확대된 이미지가 캔버스의 가운데에서 시작하도록 계산한 후, offsetX만큼 이미지를 이동시킵니다.
+<br /> 즉, 마우스가 캔버스의 오른쪽에 있으면 이미지는 왼쪽으로 이동합니다.<br />
+마우스가 캔버스의 아래쪽에 있으면 이미지는 위로 이동합니다.
+
+</details>
 
 ## 4-3. 축소 시 이미지 위치를 조정하기
 
