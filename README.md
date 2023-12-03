@@ -2,7 +2,7 @@
 
 # 1. 색상의 유사성을 어떻게 알 수 있을까?
 
-## 1-1. 수치를 비교해 색상의 유사성을 파악하기
+## 1-1. 색상의 유사성을 분석하는 기법들
 
 색상 간의 유사성을 파악하는 다양한 기법이 있습니다 (CIE76 색차 공식, 색상 히스토그램 비교, 구조적 유사성 지수 (SSIM) 등)
 <br />
@@ -16,7 +16,7 @@
 <br />
 Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라이브러리를 사용하지 않을 수 있고, 색상의 유사성을 표현하는 정확한 방법이라는 장점이 있어 이 방법을 채택했습니다.
 
-## 1-2 색상의 차이를 비교하는 방법
+## 1-2 색상 수치의 차이를 비교하는 방법
 
 1.평균 거리 방식
 <br /> 2.색상 비율 방식
@@ -29,7 +29,7 @@ Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라�
 ### 색상의 유사성을 계산
 
 세가지 방법 중 가장 정확성이 높고, 색상의 왜곡이 적은 유클리드 거리 공식을 사용했습니다.
-
+<br />
 실제 코드에서는 아래와 같이 구현했습니다.
 
 ```jsx
@@ -53,12 +53,12 @@ const calculateDistance = (rgb1, rgb2) => {
 ## 2-1. 부분 탐색으로도 정확한 조회가 가능하도록 커스텀 탐색 로직 구현
 
 클라이언트에서 보낸 색상과 가장 가까운 색상을 찾기 위해서 DB 전체를 탐색하는 것은 비효율적일 것입니다.
-
+<br />
 DB 전체를 탐색하지 않고 부분만 탐색해도 정확한 조회가 가능하도록 커스텀 탐색 로직을 구현했습니다.
-
+<br />
 R, G, B 값은 0부터 255까지로 표현됩니다. 이 R, G, B 값을 축으로 해서 아래 그림과 같은 3차원 공간으로 표현할 수 있습니다.
 
-<img width="400" alt="rgb" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/935e5e11-ead1-483e-9daa-7c300140117c">
+<img width="350" alt="rgb" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/935e5e11-ead1-483e-9daa-7c300140117c">
 
 이 색상의 범위를 이용해서 각각의 구역으로 나누어, 클라이언트에서 보낸 색상이 포함된 구역과 같은 구역의 값들과 거리를 측정하는 방법을 사용했습니다.
 
@@ -74,7 +74,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 
 7등분씩 나누게 되면, 한 구역에 사진이 없을 확률도 높아지고, 인접하는 구역 내에 사진이 없을 확률도 존재합니다. 즉, 가장 유사한 사진을 검색할 수 없을 확률이 존재합니다.
 
-따라서 전체 R, G, B를 각각 6개의 구역으로 나누었습니다. 밀도의 불균일성을 고려 하더라도 한 구역에 1개 이상 있을 확률이 높다고 판단했습니다. 실제로도 아래의 분포에서 대부분의 구역에 사진이 존재하는 것을 볼 수 있습니다.
+따라서 전체 R, G, B를 각각 6개의 구역으로 나누었습니다. 밀도의 불균일성을 고려 하더라도 한 구역에 1개 이상 있을 확률이 높다고 판단했습니다. 아래 사진을 보면 6개씩의 구역으로 나누었을 때의 DB의 분포를 볼 수 있습니다. 이 사진에서도 대부분의 구역에 데이터가 존재하는 것을 볼 수 있습니다.
 
 <img width="300" alt="3d 산점도" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/9d23b183-9b50-4c82-9c60-403f87cc16e2">
 
@@ -87,7 +87,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 하지만 동일한 구역에 있는 사진들만 탐색한다면 탐색 결과의 정확성이 줄어듭니다.
 같은 구역인 사진들 보다, 인접한 구역에 있는 사진들이 색상이 더 가까울 수 있기 때문입니다.
 
-<img width="250" alt="인접" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/7ada337f-d509-4011-9ff9-12513450c4a6">
+<img width="200" alt="인접" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/7ada337f-d509-4011-9ff9-12513450c4a6">
 
 위 그림은 2차원으로 표현한 구역입니다. 클라이언트에서 보낸 색상을 분홍색 점으로 표시해두었습니다. 이 점과 같은 구역에 속해 있는 녹색점 보다, 인접한 구역에 있는 보라색 지점과의 거리가 더 가까운 것을 볼 수 있습니다. DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표현하기 어렵고, 유사한 색상을 탐색하는 프로젝트의 특성을 고려했을 때 탐색의 속도보다는 정확성이 더 중요하다고 판단했습니다. 따라서 같은 구역 뿐만 아니라 인접한 구역까지도 함께 탐색해서 가장 유사한 색상을 탐색할 수 있도록 구현했습니다.
 
@@ -124,7 +124,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 하지만 지금보다 훨씬 많은 사진을 추가하게 되는 상황이 발생한다면, 6개의 구역으로 나누는 방식으로도 많은 사진이 존재하게 됩니다.
 
-이렇게 많은 사진이 추가되는 경우 그때 마다 구역의 갯수를 알맞게 나누고, 다시 구역에 따라 사진을 분류해야합니다. 연산 횟수 최적화를 하기 위한 비용이 많이 들게 됩니다.
+이렇게 많은 사진이 추가되는 경우 그때 마다 구역의 갯수를 알맞게 나누고, 다시 구역에 따라 사진을 분류해야합니다. 연산 횟수 최적화를 하기 위해서 추가적인 분류를 해야하므로 연산 비용이 높습니다.
 
 <br />
 
@@ -138,7 +138,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 <img width="800" alt="탐색 시간 (커스텀)" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/aeb1b5c9-7b9b-44c0-ac42-f9e20c7a6efc">
 
-위 사진은 실제로 탐색 시간을 측정한 결과입니다. 적게는 258에서부터 많게는 516까지 탐색 시간의 분포가 일관되지 않은 것을 볼 수 있습니다.
+위 사진은 실제 탐색 시간을 측정한 결과입니다. 적게는 258ms에서부터 많게는 516ms까지 탐색 소요 시간의 분포가 일관되지 않은 것을 볼 수 있습니다.
 <br />
 이 예시에서는 표준편차가 78.84로 계산 되었습니다. 이 처럼 탐색 시간이 일관되지 않다면, 탐색 결과의 신뢰성이 보장되지 않습니다.
 
@@ -179,20 +179,136 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 
 ## 4-1. 어떻게 사진을 자연스럽게 확대할까?
 
-throttle vs requestAnimationFrame 비교
-<br />
+### throttle과 requestAnimationFrame
+
 ![throttle loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/2e6b01a0-616b-4b24-802d-dfff9af23607)
 <br />
 throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스럽거나 끊기는 현상이 발생합니다.
+<br />
+[해당 코드](https://github.com/NayeongK/objecthorizon-client/blob/2857b1694e8c1be699a834696b7ebca565f4d5b1/src/components/ImageLayout/index.jsx#L134)
 <br />
 <br />
 ![rAF loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/dad753cd-5906-4bb1-927f-b3d4b7ce2fac)
 <br />
 requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
 
-## 4-2. 확대 시점을 어떻게 계산할까?
+###
 
-마우스가 위치한 사진의 지점이 확대되도록 하는 방법
+## 4-2. 확대 지점을 어떻게 계산할까?
+
+### 마우스가 위치한 사진의 지점이 확대되도록 하는 방법
+
+사용자가 마우스를 이용해서 확대할 지점을 선택 수 있도록 구현했습니다.
+마우스 방향으로 자연스럽게 확대되도록 하기 위해서는 마우스의 위치가 화면에 중앙에 오는 것이 아니라, 마우스가 놓여진 지점을 향해 자연스럽게 확대되는 방식이 자연스럽다고 생각했습니다. 이 기능을 구현하기 위해서 여러 단계로 나누어 작업했습니다.
+
+### 1단계 : 마우스의 위치를 추적하기
+
+```
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    function handleMouseMove(e) {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    }
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+  }, [viewState.zoom]);
+```
+
+이 코드는 canvas 요소에 마우스 이동(mousemove)과 휠(wheel) 이벤트를 감지하고 처리하는 로직입니다.
+
+e.clientX와 e.clientY는 이벤트 객체 e의 속성으로, 현재 마우스 포인터의 위치를 브라우저 화면의 X, Y 좌표로 나타 냅니다.
+
+> clientX: 브라우저 화면의 가로축에 대한 마우스 포인터의 위치입니다. 화면의 왼쪽 가장자리로부터의 거리를 픽셀 단위로 나타냅니다.
+> <br />
+> clientY: 브라우저 화면의 세로축에 대한 마우스 포인터의 위치입니다. 화면의 상단 가장자리로부터의 거리를 픽셀 단위로 나타냅니다.
+
+이 방법을 사용하면 마우스의 위치를 알 수 있습니다.
+handleMouseMove 함수에서 마우스의 현재 위치를 setMousePosition로 업데이트 합니다.
+이 마우스의 위치는 확대 / 축소의 중심점 계산 로직을 계산하는데 사용 됩니다.
+
+### 2단계 : 확대 / 축소 정도 계산하기
+
+```
+  function handleWheelEvent(e) {
+    const scale = -e.deltaY * 0.01;
+    const currentZoom = viewState.zoom;
+    const newZoom = currentZoom * (1 + scale);
+  // 중략
+  }
+```
+
+노트북 터치패드를 사용한 핀치 줌은 마우스의 휠 이벤트를 사용해서 구현할 수 있습니다.
+<br />
+<br />
+`e.deltaY`를 사용하면 마우스 휠의 방향과 속도를 감지할 수 있습니다.
+<br />
+아래로 스크롤 하면(또는 핀치 줌으로 확대 모션을 하면) deltaY는 양수이고,
+<br />
+위로 스크롤하면 (또는 핀치 줌으로 축소 모션을 하면) deltaY는 음수입니다.
+<br />
+`scale` 변수는 deltaY에 기반하여 확대/축소 비율을 결정합니다. (-e.deltaY \* 0.01)
+`viewState.zoom` 값은 현재 확대/축소 상태를 나타냅니다. 이 값에 scale을 곱하여 새로운 확대/축소 비율인 `newZoom`을 계산할 수 있습니다.
+
+### 3단계 : 확대 / 축소에 따른 이미지 그리기
+
+<details>
+<summary>구현된 코드</summary>
+
+```
+function drawImage(canvas, ctx, image, zoomValue) {
+  const canvasWidth = window.innerWidth;
+  const canvasHeight = window.innerHeight;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+const imgRatio = image.width / image.height;
+let drawWidth = canvasWidth * zoomValue;
+let drawHeight = drawWidth / imgRatio;
+
+const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
+const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
+
+let startX = (canvasWidth - drawWidth) / 2 - offsetX;
+let startY = (canvasHeight - drawHeight) / 2 - offsetY;
+
+if (startX > 0) {
+  startX = 0;
+}
+if (startY > 0) {
+  startY = 0
+};
+if (startX + drawWidth < canvasWidth) {
+  startX = canvasWidth - drawWidth;
+}
+if (startY + drawHeight < canvasHeight) {
+  startY = canvasHeight - drawHeight;
+}
+
+ctx.fillStyle = "black";
+ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
+}
+
+```
+
+</details>
+<br />
+
+`drawImage` 함수는 확대/축소한 이미지를 canvas에 그립니다.
+
+`캔버스 크기 설정`: 먼저 브라우저 창의 크기(window.innerWidth, window.innerHeight)를 사용하여 캔버스의 크기를 설정합니다.
+
+`이미지 비율 계산`: imgRatio는 이미지의 가로세로 비율을 나타냅니다. 이를 사용하여 캔버스 크기에 맞춰 확대/축소할 이미지의 크기를 결정합니다.
+
+`확대/축소된 이미지 크기 계산`: zoomValue를 사용하여 확대/축소된 이미지의 크기(drawWidth, drawHeight)를 계산합니다.
+
+`이미지 위치 결정`:
+마우스 위치(mousePosition.x, mousePosition.y)를 사용하여 확대 중심점을 계산합니다.
+offsetX와 offsetY는 마우스 위치를 기준으로 확대할 때 이미지가 얼마나 이동해야 하는지를 나타냅니다.
+startX와 startY는 이미지가 캔버스에 그려질 시작 위치입니다. 이는 확대 중심점을 기준으로 계산됩니다.
+이미지가 캔버스 밖으로 나가지 않도록 경계값을 체크합니다.
 
 ## 4-3. 확대와 축소에서의 사용자 경험 증대
 
