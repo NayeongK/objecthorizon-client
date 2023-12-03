@@ -181,12 +181,12 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 
 throttle vs requestAnimationFrame 비교
 <br />
-![throttle](https://github.com/NayeongK/objecthorizon-client/assets/80331804/f78ca1c7-dac4-4ee3-b1b8-84c82038e3fa)
+![throttle loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/2e6b01a0-616b-4b24-802d-dfff9af23607)
 <br />
 throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스럽거나 끊기는 현상이 발생합니다.
 <br />
 <br />
-![rAF](https://github.com/NayeongK/objecthorizon-client/assets/80331804/a89d17da-d273-478d-974e-f57546ba180d)
+![rAF loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/dad753cd-5906-4bb1-927f-b3d4b7ce2fac)
 <br />
 requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
 
@@ -211,7 +211,7 @@ requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이
 
 2. 사진의 배경 픽셀 중 가장 빈도가 높은 색상을 대표 색상으로 선택하기
 
-<img width="510" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
+<img width="350" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
 
 배경색이 같은 경우의 색상 변화가 더 자연스럽기 때문에 배경의 색상을 유사하게 하는 방법을 선택했습니다.
 
