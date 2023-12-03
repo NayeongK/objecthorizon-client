@@ -8,15 +8,21 @@
 <br />
 이러한 특수한 방법을 사용하지 않고도 색상을 수치로 표현하고, 그 수치의 차이를 비교하는 방법으로 색상의 유사성을 알 수 있을 것이라고 생각했습니다.
 
+그 중에서도 R, G, B 값을 사용 해서 색상을 수치로 표현하기로 했습니다.
+
 <img width="300" alt="3d 산점도" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/9d23b183-9b50-4c82-9c60-403f87cc16e2">
 
 위 도표는 실제 DB에 저장되어있는 데이터의 R, G, B 값의 분포를 나타낸 3d 산점도 입니다.
 <br />
-가까운 곳에 있는 점들 간의 색상이 유사한 것을 볼 수 있습니다. R, G, B 수치 간의 차이를 비교하는 방식은 여러 장점이 있었습니다.
-<br />
-Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라이브러리를 사용하지 않을 수 있고, 색상의 유사성을 표현하는 정확한 방법이라는 장점이 있어 이 방법을 채택했습니다.
+가까운 곳에 있는 점들 간의 색상이 유사한 것을 볼 수 있습니다.
 
-## 1-2 색상 수치의 차이를 비교하는 방법
+R, G, B를 사용해서 색상을 표현하고, 비교하는 방식은 여러 장점이 있었습니다.
+<br />
+Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라이브러리를 사용하지 않을 수 있고, 색상을 표현하는 정확한 방법이라는 장점이 있어 이 방법을 채택했습니다.
+
+## 1-2 색상의 차이를 비교하는 방법
+
+이 R, G, B 값 간의 차이를 비교하는 방법은 다양했습니다.
 
 1.평균 거리 방식
 <br /> 2.색상 비율 방식
@@ -32,7 +38,7 @@ Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라�
 <br />
 실제 코드에서는 아래와 같이 구현했습니다.
 
-```jsx
+```javascript
 const calculateDistance = (rgb1, rgb2) => {
   const [r1, g1, b1] = rgb1;
   const [r2, g2, b2] = rgb2;
@@ -96,7 +102,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 <br />
 <br />
 DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표현하기 어렵고, 유사한 색상을 탐색하는 프로젝트의 특성을 고려했을 때 탐색의 속도보다는 정확성이 더 중요하다고 판단했습니다. 따라서 같은 구역 뿐만 아니라 인접한 구역까지도 함께 탐색해서 가장 유사한 색상을 탐색할 수 있도록 구현했습니다.
-
+<br />
 <br />
 
 ### 인접한 구역의 갯수
@@ -105,7 +111,7 @@ DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표
 
 <img width="250" alt="인접구역 갯수" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/5b205ee0-bfa7-47b8-b713-fb2dec3c820a">
 
-꼭지점 구역의 인접 구역은 8개, 모서리 구역의 인접 구역은 12개 이므로, 27개 보다 더 적은 구역을 탐색할 수 있습니다.
+(꼭지점 구역의 인접 구역은 8개, 모서리 구역의 인접 구역은 12개 입니다)
 
 DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역만 탐색할 수 있도록 구현해, 탐색 범위가 87.5% 감소하게 되었습니다.
 
@@ -124,7 +130,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 앞서 구현했던 커스텀 탐색 로직 방식에는 두가지 문제점이 있었습니다.
 
-### 1. 사진을 더 많이 추가하게 되면, 구역을 세분화해야합니다
+### 1. 사진을 더 많이 추가하게 되면 구역을 세분화 해야한다
 
 6등분으로 나누었을 경우에는 27개의 구역 내에 있는 사진이 많지 않습니다. 따라서 사진을 추가해도 탐색 시간에 큰 차이는 없습니다.
 
@@ -132,7 +138,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 이렇게 많은 사진이 추가되는 경우 그때 마다 구역의 갯수를 알맞게 나누고, 다시 구역에 따라 사진을 분류해야합니다. 연산 횟수 최적화를 하기 위해서 추가적인 분류를 해야하므로 연산 비용이 높습니다.
 
-### 2. 색상에 따라 사진 탐색 시간이 불규칙합니다
+### 2. 색상에 따라 사진 탐색 시간이 불균일하다
 
 아래 3d 산점도에 표시한 영역들을 보면 분포가 일정하지 않아 상대적으로 밀도가 높은 구역과 낮은 구역이 존재합니다.
 
@@ -145,6 +151,8 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 위 사진은 실제 탐색 시간을 측정한 결과입니다. 적게는 258ms에서부터 많게는 516ms까지 탐색 소요 시간의 분포가 일관되지 않은 것을 볼 수 있습니다.
 <br />
 커스텀 탑색로직에서의 탐색 시간의 표준편차는 78.84로 계산 되었습니다. 이처럼 탐색 시간이 일관되지 않다면, 탐색 결과의 신뢰성이 보장되지 않습니다.
+
+<br />
 
 ## 3-2. 자료구조를 적용해서 탐색의 일관성을 높인다.
 
@@ -196,7 +204,7 @@ throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스�
 <br />
 requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
 
-###
+<br />
 
 ## 4-2. 확대 지점을 어떻게 계산할까?
 
@@ -207,17 +215,17 @@ requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이
 
 ### 1단계 : 마우스의 위치를 추적하기
 
-```
-  useEffect(() => {
-    const canvas = canvasRef.current;
+```javascript
+useEffect(() => {
+  const canvas = canvasRef.current;
 
-    function handleMouseMove(e) {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    }
+  function handleMouseMove(e) {
+    setMousePosition({ x: e.clientX, y: e.clientY });
+  }
 
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("wheel", handleWheel, { passive: false });
-  }, [viewState.zoom]);
+  canvas.addEventListener("mousemove", handleMouseMove);
+  canvas.addEventListener("wheel", handleWheel, { passive: false });
+}, [viewState.zoom]);
 ```
 
 이 코드는 canvas 요소에 마우스 이동(mousemove)과 휠(wheel) 이벤트를 감지하고 처리하는 로직입니다.
@@ -234,13 +242,13 @@ handleMouseMove 함수에서 마우스의 현재 위치를 setMousePosition로 �
 
 ### 2단계 : 확대 / 축소 정도 계산하기
 
-```
-  function handleWheelEvent(e) {
-    const scale = -e.deltaY * 0.01;
-    const currentZoom = viewState.zoom;
-    const newZoom = currentZoom * (1 + scale);
+```javascript
+function handleWheelEvent(e) {
+  const scale = -e.deltaY * 0.01;
+  const currentZoom = viewState.zoom;
+  const newZoom = currentZoom * (1 + scale);
   // 중략
-  }
+}
 ```
 
 노트북 터치패드를 사용한 핀치 줌은 마우스의 휠 이벤트를 사용해서 구현할 수 있습니다.
@@ -262,41 +270,40 @@ handleMouseMove 함수에서 마우스의 현재 위치를 setMousePosition로 �
 <details>
 <summary>구현된 코드</summary>
 
-```
+```javascript
 function drawImage(canvas, ctx, image, zoomValue) {
   const canvasWidth = window.innerWidth;
   const canvasHeight = window.innerHeight;
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
 
-const imgRatio = image.width / image.height;
-let drawWidth = canvasWidth * zoomValue;
-let drawHeight = drawWidth / imgRatio;
+  const imgRatio = image.width / image.height;
+  let drawWidth = canvasWidth * zoomValue;
+  let drawHeight = drawWidth / imgRatio;
 
-const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
-const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
+  const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
+  const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
 
-let startX = (canvasWidth - drawWidth) / 2 - offsetX;
-let startY = (canvasHeight - drawHeight) / 2 - offsetY;
+  let startX = (canvasWidth - drawWidth) / 2 - offsetX;
+  let startY = (canvasHeight - drawHeight) / 2 - offsetY;
 
-if (startX > 0) {
-  startX = 0;
+  if (startX > 0) {
+    startX = 0;
+  }
+  if (startY > 0) {
+    startY = 0;
+  }
+  if (startX + drawWidth < canvasWidth) {
+    startX = canvasWidth - drawWidth;
+  }
+  if (startY + drawHeight < canvasHeight) {
+    startY = canvasHeight - drawHeight;
+  }
+
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+  ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
 }
-if (startY > 0) {
-  startY = 0
-};
-if (startX + drawWidth < canvasWidth) {
-  startX = canvasWidth - drawWidth;
-}
-if (startY + drawHeight < canvasHeight) {
-  startY = canvasHeight - drawHeight;
-}
-
-ctx.fillStyle = "black";
-ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
-}
-
 ```
 
 </details>
@@ -324,8 +331,9 @@ startX와 startY는 이미지가 캔버스에 그려질 시작 위치입니다. 
 
 ### 확대하는 경우와 축소되는 경우를 분기처리
 
-```
+```javascript
 if (zoomValue > 1) {
+  // 확대할 때
   const offsetX = (mousePosition.x - canvasWidth / 2) * (zoomValue - 1);
   const offsetY = (mousePosition.y - canvasHeight / 2) * (zoomValue - 1);
 
@@ -335,15 +343,36 @@ if (zoomValue > 1) {
   if (startX > 0) startX = 0;
   if (startY > 0) startY = 0;
   if (startX + drawWidth < canvasWidth) startX = canvasWidth - drawWidth;
-  if (startY + drawHeight < canvasHeight)
-    startY = canvasHeight - drawHeight;
+  if (startY + drawHeight < canvasHeight) startY = canvasHeight - drawHeight;
 } else {
+  //축소할 때
   startX = (canvasWidth - drawWidth) / 2;
   startY = (canvasHeight - drawHeight) / 2;
 }
-
 ```
 
+### 축소 시 이미지 위치 계산
+
+```javascript
+startX = (canvasWidth - drawWidth) / 2;
+startY = (canvasHeight - drawHeight) / 2;
+```
+
+이미지가 정중앙에 위치하도록 하기 위해서, 이미지의 위치를 계산해야합니다.
+<br />
+
+> startX는 이미지가 시작되는 좌표입니다.
+> startX는 (canvasWidth - drawWidth) / 2로 계산됩니다.
+> <br />
+> canvasWidth - drawWidth는 캔버스 너비에서 이미지 너비를 빼고 남은 공간입니다.
+> <br />
+> 이 남은 공간을 2로 나누어 양쪽에 균등하게 배치하면 이미지가 캔버스 가로의 중앙에 위치하게 됩니다
+> <br />
+> 이미지 시작점의 Y 좌표(startY)도 같은 방법으로 (canvasHeight - drawHeight) / 2 로 계산합니다.
+> <br />
+> 이렇게 계산된 위치에 ctx.drawImage 함수를 사용하여 이미지를 그리면, 이미지는 캔버스의 정중앙에 위치하게 됩니다. 이는 캔버스의 가로와 세로 중앙에서 이미지의 너비와 높이의 절반만큼씩 오프셋을 적용한 것과 같습니다.
+
+이 로직을 사용해서
 zoomValue가 1보다 클 때는 마우스 위치를 기준으로 확대하도록 하고,
 <br />
 zoomValue가 1이하일 때는 화면의 중앙에 고정되도록 해서 축소 시에 사용자 경험을 개선시켰습니다.
@@ -360,22 +389,22 @@ zoomValue가 1이하일 때는 화면의 중앙에 고정되도록 해서 축소
 줌 이후에 나오는 사진을 자연스럽게 느끼기 위해서는 색상의 유사성이 중요하다는 생각이 들었습니다.
 <br />
 하지만 이미지에는 많은 픽셀과 색상들이 존재합니다.
-사진 전체의 픽셀중 어떤 기준으로 대표 색상을 선택해야, 사용자가 다음 사진의 색상이 유사하다고 느낄 지 고민했습니다.
+사진 전체의 수 많은 픽셀중 어떤 픽셀을 기준으로 대표 색상을 선택해야 다음 사진의 색상이 유사하다고 느낄 수 있을 지 고민했습니다.
 
 1. 사진의 `전체`의 픽셀 중 가장 빈도가 높은 색상
 
-2. 사진의 `배경` 픽셀 중 가장 빈도가 높은 색상
+2. 사진의 `배경`의 픽셀 중 가장 빈도가 높은 색상
 
-<img width="350" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
+<img width="300" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
 
-위 그림을 보았을 때, 사진 전체에서 더 빈번한 색상을 기준으로 하는 것 보다, 배경색이 같은 경우의 색상 변화를 더 자연스럽게 느낀다는 생각이 들었습니다. 따라서 배경의 색상 중 가장 많은 색상을 기준으로 대표 색상을 결정하는 방법을 선택했습니다.
+위 그림을 보았을 때, 사진 전체에서 빈도가 높은 색상을 기준으로 하는 것 보다, 배경색이 같은 경우의 색상 변화를 더 자연스럽게 느낀다는 판단이 들었습니다. 따라서 배경의 색상 중 가장 많은 색상을 기준으로 대표 색상을 결정하는 방법을 선택했습니다.
 
 가장자리의 픽셀값을 사용해서 가장 빈도가 높은 색상을 대표 색상으로 추출하는 로직은 아래와 같습니다
 
 <details>
 <summary>가장자리 픽셀 추출 로직</summary>
 
-```jsx
+```javascipt
 const getDominantBackgroundColor = function (canvas) {
   const ctx = canvas.getContext("2d");
   const edgePixels = [];
@@ -419,6 +448,8 @@ const getDominantBackgroundColor = function (canvas) {
 </details>
 
 ## 6-1. Safari에서 Wheel 이벤트가 인식되지 않는 문제
+
+Safari에서는 Wheel 이벤트를 인식하지 못하는 문제가 있었습니다.
 
 ### **이벤트 위임과 버블링의 활용**
 
