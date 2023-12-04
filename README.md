@@ -1,3 +1,46 @@
+# **Object Horizon**
+
+사물의 지평선은 줌으로 확대한 지점과 유사한 색을 가진 사진을 무한히 렌더링하는 웹 앱입니다
+
+[배포사이트](http://app.object-horizon.com)
+
+**preview**
+![preview2](https://github.com/NayeongK/objecthorizon-client/assets/80331804/d33de3d8-3c73-46bb-b3a5-c41bcd491752)
+<br />
+
+# Feature
+
+<img width="100" alt="Pinch_zoom" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/9442b8be-6ae9-49f3-b061-320f8cb57604">
+<br/>
+
+1.터치패드를 이용한 줌 인 모션으로 사진을 확대할 수 있습니다
+<br/> 2.일정 비율 이상 확대 되면, 현재 색상과 유사한 다른 사진이 렌더링 됩니다
+<br/> 3.마우스의 위치를 향해 확대되므로, 마우스를 이용해 확대 지점을 변경할 수 있습니다
+<br/> 4.줌 아웃 모션을 하면 사진이 축소됩니다
+<br /> 5.일정 비율 이상 축소 되면, 이전 사진이 역순으로 보여집니다
+
+# Table of Contents
+
+[Challenge](#challenge)
+
+- [1. 색상의 유사성을 어떻게 알 수 있을까?](#1-색상의-유사성을-어떻게-알-수-있을까)
+
+  - [1-1. 색상의 유사성을 분석하는 기법들](#1-1-색상의-유사성을-분석하는-기법들)
+  - [1-2. 색상의 차이를 비교하는 방법](#1-2-색상의-차이를-비교하는-방법)
+
+- [2. 효율적으로 DB를 탐색할 수 있을까?](#2-효율적으로-db를-탐색할-수-있을까)
+  - [2-1. 부분 탐색으로도 정확한 조회가 가능하도록 커스텀 탐색 로직 구현](#2-1-부분-탐색으로도-정확한-조회가-가능하도록-커스텀-탐색-로직-구현)
+  - [2-2. 정확성을 위한 탐색 : 인접한 구역을 포함하기](#2-2-정확성을-위한-탐색--인접한-구역을-포함하기)
+- [3. 탐색 로직 최적화하기](#3-탐색-로직-최적화하기)
+  - [3-1. 기존 탐색 로직의 문제점](#3-1-기존-탐색-로직의-문제점)
+  - [3-2. 자료구조를 적용해서 탐색의 일관성을 높인다](#3-2-자료구조를-적용해서-탐색의-일관성을-높인다)
+- [4. 부드러운 이미지 확대 효과](#4-부드러운-이미지-확대-효과)
+  - [4-1. 어떻게 사진을 자연스럽게 확대할까](#4-1-어떻게-사진을-자연스럽게-확대할까)
+  - [4-2. 확대 지점을 어떻게 계산할까](#4-2-확대-지점을-어떻게-계산할까)
+  - [4-3. 축소 시 이미지 위치를 조정하기](#4-3-축소-시-이미지-위치를-조정하기)
+- [5. 자동화 스크립트로 색상을 추출하고 저장](#5-자동화-스크립트로-사진-색상을-추출하고-저장)
+- [6. 크로스 브라우징 이슈](#6-크로스-브라우징-이슈)
+
 # Challenge
 
 # 1. 색상의 유사성을 어떻게 알 수 있을까?
@@ -86,7 +129,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 
 <br />
 
-## 2-3. 정확성을 위한 탐색 : 인접한 구역을 포함하기
+## 2-2. 정확성을 위한 탐색 : 인접한 구역을 포함하기
 
 ### 탐색 속도 감소 vs 탐색 결과의 정확성
 
@@ -494,6 +537,10 @@ const getDominantBackgroundColor = function (canvas) {
 ```
 
 </details>
+<br />
+<br />
+
+# 6. 크로스 브라우징 이슈
 
 ## 6-1. Safari에서 Wheel 이벤트가 인식되지 않는 문제
 
@@ -530,15 +577,27 @@ useEffect(() => {
 
 이벤트 위임과 이벤트 버블링을 사용해서, 문서 전체에서 발생하는 휠 이벤트를 관리하는 방식으로 Safari에서의 이벤트 처리 이슈를 해결했습니다.
 <br />
-<br />
 
-## 6-2. Safari에서 Wheel 이벤트 인식 로직을 추가한 후 Chrome에서 fetch 중복 문제
+# TimeLine
 
-<img width="400" alt="스크린샷 2023-12-03 오후 5 13 25" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/643b0c49-8753-414e-b821-153b02dbed4a">
-<br />
-Safari 네트워크 요청 탭에서는 사진이 렌더링 되기 전, 한번만 fetch 됩니다.
-<br />
-<br />
-<img width="400" alt="스크린샷 2023-12-03 오후 5 14 52" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/d58ab50a-898b-426a-b21f-33294029f51c">
-<br />
-Chrome의 네트워크 탭에서는 한 사진이 렌더링 되는 동안에도, 중복해서 fetch가 일어나는 현상이 있었습니다.
+프로젝트 기간 : 23.08.07 - 23.09.07(총 31일, 기획 및 설계 8일, 개발 및 마무리 23일)
+
+## **Tech Stack**
+
+**Client**:
+<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white">
+
+**Server**:
+<img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">
+<img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=Express&logoColor=white">
+<img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
+<img src="https://img.shields.io/badge/AmazonS3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white">
+
+**Test**:
+<img src="https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=Jest&logoColor=white">
+<img src="https://img.shields.io/badge/React Testing Library-E33332?style=for-the-badge&logo=TestingLibrary&logoColor=white">
+<img src="https://img.shields.io/badge/Supertest-569A31?style=for-the-badge&logo=&logoColor=white">
+
+**Deployment**:
+<img src="https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=Netlify&logoColor=white">
+<img src="https://img.shields.io/badge/AWS Elastic Beanstalk-FF9900?style=for-the-badge&logo=&logoColor=white">
