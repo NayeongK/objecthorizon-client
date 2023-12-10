@@ -5,12 +5,14 @@
 [배포사이트](http://app.object-horizon.com)
 
 **preview**
+<br/>
 ![preview2](https://github.com/NayeongK/objecthorizon-client/assets/80331804/d33de3d8-3c73-46bb-b3a5-c41bcd491752)
 <br />
 
 # Feature
 
-<img width="100" alt="Pinch_zoom" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/9442b8be-6ae9-49f3-b061-320f8cb57604">
+<img width="300" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/23c30fec-162b-4d3a-af2b-86cbe20c48aa">
+
 <br/>
 
 1.터치패드를 이용한 줌 인 모션으로 사진을 확대할 수 있습니다
@@ -144,7 +146,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 <br /> 이 점과 같은 구역에 속해 있는 녹색점 보다, 인접한 구역에 있는 보라색 지점과의 거리가 더 가까운 것을 볼 수 있습니다.
 <br />
 <br />
-DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표현하기 어렵고, 유사한 색상을 탐색하는 프로젝트의 특성을 고려했을 때 탐색의 속도보다는 정확성이 더 중요하다고 판단했습니다. 따라서 같은 구역 뿐만 아니라 인접한 구역까지도 함께 탐색해서 가장 유사한 색상을 탐색할 수 있도록 구현했습니다.
+DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표현하기 어려운 상황 속에서, 유사한 색상을 탐색해 보여 주어야 하는 프로젝트의 특성을 고려했을 때, 탐색의 속도보다는 정확성이 더 중요하다고 판단했습니다. 따라서 같은 구역 뿐만 아니라 인접한 구역까지도 함께 탐색해서 가장 유사한 색상을 탐색할 수 있도록 구현했습니다.
 <br />
 <br />
 
@@ -199,21 +201,29 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 ## 3-2. 자료구조를 적용해서 탐색의 일관성을 높인다.
 
-처음 고안했던 방법을 사용하지 않고도, MongoDB 전체를 다 탐색하지 않으면서 일관되고 정확하게 탐색할 수 있는 방법을 찾아보았습니다.
+커스텀 탐색 로직을 사용하지 않고도, MongoDB 전체를 다 탐색하지 않고 정확하고 일관되게 탐색할 수 있는 방법을 찾아보았습니다.
 <br/>
-k-d tree 자료구조는 고차원 공간에서 가까운 이웃을 빠르게 검색하는 데 사용되는 자료구조 입니다.
 
-여기서 '가까운 이웃'이란 유클리드 거리와 같은 거리 측정에 따라 결정됩니다.
+k-d tree 자료구조는 고차원 공간에서 가까운 이웃을 빠르게 검색하는 데 사용되는 자료구조 입니다. <br />
+(여기서 '가까운 이웃'이란 유클리드 거리와 같은 거리 측정에 따라 결정됩니다.)
 
-k-d tree는 각 노드가 k차원의 한 점을 나타내며, 트리의 각 단계에서 한 차원에 대해 노드를 분할하여 구축됩니다.
-<br />
-k-d tree는 효율적인 탐색을 위해 공간을 이진 탐색 트리와 유사한 방법으로 분할합니다.
+### k-d tree의 구현
 
+k-d tree는 각 노드가 k차원의 한 점을 나타내며, 트리의 각 단계에서 한 차원에 대해 노드를 분할하여 구축됩니다.k-d tree는 효율적인 탐색을 위해 공간을 이진 탐색 트리와 유사한 방법으로 분할합니다.
 <img width="234" alt="kdtree" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/01a3b424-36da-4e2d-b3ee-177ce1e3871d">
 
-k-d tree 자료구조를 만들 때, RGB 각각을 축으로 사용하여 3차원 k-d tree를 만듭니다.
+이 경우에는 R,G,B 각각을 축으로 사용하여 3차원 k-d tree를 만듭니다.
 <br />
+[구현 과정 링크]()
+<br />
+
+### k-d tree의 탐색
+
 이렇게 만들어진 k-d tree를 탐색할 때는 트리를 재귀적으로 내려가면서 현재 노드와 목표 점 사이의 거리를 계산하고, 그 거리를 기반으로 가장 가까운 이웃을 찾습니다.
+<br />
+[구현 과정 링크]()
+
+### k-d tree의 시간 복잡도
 
 k-d tree의 시간 복잡도는 데이터 구조를 구축하는 데 O(nlogn) 이며, 이는 모든 데이터 점을 트리에 삽입하는 데 필요한 시간입니다.
 <br />
@@ -227,6 +237,77 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 <br />
 적절한 자료구조로 변경하여 결과값의 일관성이 높아지면서 결과의 신뢰성도 높일 수 있게 되었습니다.
 
+<br />
+
+## 3-3. 외부 라이브러리 없이 K-D Tree 자료구조 구현하기
+
+k-d tree 자료구조를 적용하도록 하는 라이브러리가 존재합니다(KDBush, kdtree 등) <br />
+외부 라이브러리를 사용해서 자료구조를 적용하는 대신, 직접 자료구조를 구현해 보았습니다.
+
+[전체 코드](https://github.com/NayeongK/objecthorizon-server/blob/main/utils/kd-tree.js)
+
+### 1.k-d tree 구현하기
+
+```javascript
+function buildKDTree(points, depth = 0) {
+  if (!points.length) {
+    return null;
+  }
+
+  const k = points[0].length;
+  const axis = depth % k;
+
+  points.sort((a, b) => a[axis] - b[axis]);
+  const median = Math.floor(points.length / 2);
+
+  const node = {
+    point: points[median],
+    left: buildKDTree(points.slice(0, median), depth + 1),
+    right: buildKDTree(points.slice(median + 1), depth + 1),
+    axis: axis,
+  };
+
+  return node;
+}
+```
+
+<br/>
+
+### 2. 가장 가까운 원소 찾기
+
+```javascript
+function closestPoint(node, point, best = null) {
+  if (node === null) {
+    return best;
+  }
+
+  const d = distanceSquared(node.point, point);
+  const dx = node.point[node.axis] - point[node.axis];
+  let bestPoint = best;
+
+  if (best === null || d < distanceSquared(best, point)) {
+    bestPoint = node.point;
+  }
+
+  if (dx > 0) {
+    bestPoint = closestPoint(node.left, point, bestPoint);
+  } else {
+    bestPoint = closestPoint(node.right, point, bestPoint);
+  }
+
+  if (dx ** 2 < distanceSquared(bestPoint, point)) {
+    if (dx > 0) {
+      bestPoint = closestPoint(node.right, point, bestPoint);
+    } else {
+      bestPoint = closestPoint(node.left, point, bestPoint);
+    }
+  }
+
+  return bestPoint;
+}
+```
+
+<br />
 <br />
 
 # 4. 부드러운 이미지 확대 효과
