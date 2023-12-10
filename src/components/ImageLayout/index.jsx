@@ -7,6 +7,7 @@ import {
 function ImageLayout() {
   const canvasRef = useRef(null);
   const [images, setImages] = useState([]);
+  const [imageElements, setImageElements] = useState({});
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [viewState, setViewState] = useState({ imageIndex: 0, zoom: 1 });
   const [sentColor, setSentColor] = useState(false);
@@ -178,7 +179,7 @@ function ImageLayout() {
     }
 
     canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    canvas.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
       if (animationFrameId !== null) {
@@ -190,24 +191,34 @@ function ImageLayout() {
   }, [viewState.zoom]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-
-    image.addEventListener("load", () => {
-      drawImage(canvas, ctx, image, viewState.zoom);
-    });
+    function loadImage(imageIndex) {
+      const src = images[imageIndex];
+      if (!imageElements[src]) {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.src = src;
+        image.addEventListener("load", () => {
+          setImageElements((prev) => ({ ...prev, [src]: image }));
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext("2d");
+          drawImage(canvas, ctx, image, viewState.zoom);
+        });
+      } else {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        drawImage(canvas, ctx, imageElements[src], viewState.zoom);
+      }
+    }
 
     if (images.length > 0) {
-      image.src = images[viewState.imageIndex];
+      loadImage(viewState.imageIndex);
     }
-  }, [images, viewState]);
+  }, [mousePosition, images, viewState, imageElements]);
 
   return (
     <canvas
       ref={canvasRef}
-      data-testid="canvas"
+      data-testId="canvas"
       style={{
         position: "fixed",
         top: 0,
