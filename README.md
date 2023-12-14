@@ -23,31 +23,43 @@
 
 # Table of Contents
 
-[Challenge](#challenge)
+[ObjectHorizon](#object-horizon)
 
-- [1. 색상의 유사성을 어떻게 알 수 있을까?](#1-색상의-유사성을-어떻게-알-수-있을까)
+[Feature](#feature)
 
-  - [1-1. 색상의 유사성을 분석하는 기법들](#1-1-색상의-유사성을-분석하는-기법들)
-  - [1-2. 색상의 차이를 비교하는 방법](#1-2-색상의-차이를-비교하는-방법)
+[Challenge](#💡-challenges)
 
-- [2. 효율적으로 DB를 탐색할 수 있을까?](#2-효율적으로-db를-탐색할-수-있을까)
-  - [2-1. 부분 탐색으로도 정확한 조회가 가능하도록 커스텀 탐색 로직 구현](#2-1-부분-탐색으로도-정확한-조회가-가능하도록-커스텀-탐색-로직-구현)
-  - [2-2. 정확성을 위한 탐색 : 인접한 구역을 포함하기](#2-2-정확성을-위한-탐색--인접한-구역을-포함하기)
-- [3. 탐색 로직 최적화하기](#3-탐색-로직-최적화하기)
-  - [3-1. 기존 탐색 로직의 문제점](#3-1-기존-탐색-로직의-문제점)
-  - [3-2. 자료구조를 적용해서 탐색의 일관성을 높인다](#3-2-자료구조를-적용해서-탐색의-일관성을-높인다)
-- [4. 부드러운 이미지 확대 효과](#4-부드러운-이미지-확대-효과)
-  - [4-1. 어떻게 사진을 자연스럽게 확대할까](#4-1-어떻게-사진을-자연스럽게-확대할까)
-  - [4-2. 확대 지점을 어떻게 계산할까](#4-2-확대-지점을-어떻게-계산할까)
-  - [4-3. 축소 시 이미지 위치를 조정하기](#4-3-축소-시-이미지-위치를-조정하기)
-- [5. 자동화 스크립트로 색상을 추출하고 저장](#5-자동화-스크립트로-사진-색상을-추출하고-저장)
-- [6. 크로스 브라우징 이슈](#6-크로스-브라우징-이슈)
+[1. DB 탐색 로직의 구현과 최적화 과정](#1-db-탐색-로직의-구현과-최적화-과정)
 
-# Challenge
+- [1-1. 색상의 유사성을 판단하기](#1-1-색상의-유사성을-판단하기)
+- [1-2. 부분 탐색만으로 조회하는 커스텀 로직 구현](#1-2-부분-탐색만으로-조회하는-커스텀-로직-구현)
+- [1-3. 자료구조를 적용해 탐색 로직의 일관성을 향상시키기](#1-3-자료구조를-적용해서-탐색-로직의-일관성을-향상시키기)
 
-# 1. 색상의 유사성을 어떻게 알 수 있을까?
+---
 
-## 1-1. 색상의 유사성을 분석하는 기법들
+[2. 이미지를 효율적으로 저장하고 요청하기](#2-이미지를-효율적으로-저장하고-요청하기)
+
+- [2-1. 자동화 스크립트를 이용해 저장하기](#2-1-자동화-스크립트를-이용해-저장하기)
+- [2-2. 중복 요청을 방지하기](#2-2-중복-요청을-방지하기)
+
+---
+
+[3. 이미지 렌더링 최적화하기](#3-이미지-렌더링-최적화하기)
+
+- [3-1. 각기 다른 크기의 이미지를 화면에 채우기](#3-1-각기-다른-크기의-이미지를-화면에-채우기)
+- [3-2. 부드러운 이미지 확대 효과 구현하기](#3-2-부드러운-이미지-확대-효과-구현하기)
+- [3-3. 마우스의 위치를 향해 확대하는 방법](#3-3-마우스-위치를-기준으로-확대하기)
+- [3-4. 크로스 브라우징 이슈 해결](#3-4-크로스-브라우징-이슈-해결)
+
+[TimeLine](#timeline)
+
+[TechStack](#tech-stack)
+
+# 💡 Challenges
+
+# 1. DB 탐색 로직의 구현과 최적화 과정
+
+## 1-1. 색상의 유사성을 판단하기
 
 색상 간의 유사성을 파악하는 다양한 기법이 있습니다 (CIE76 색차 공식, 색상 히스토그램 비교, 구조적 유사성 지수 (SSIM) 등)
 <br />
@@ -65,7 +77,7 @@ R, G, B를 사용해서 색상을 표현하고, 비교하는 방식은 여러 �
 <br />
 Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라이브러리를 사용하지 않을 수 있고, 색상을 표현하는 정확한 방법이라는 장점이 있어 이 방법을 채택했습니다.
 
-## 1-2 색상의 차이를 비교하는 방법
+### 1. 색상의 차이를 비교하는 방법
 
 이 R, G, B 값 간의 차이를 비교하는 방법은 다양했습니다.
 
@@ -77,7 +89,7 @@ Canvas API를 이용해 R, G, B 값을 쉽게 얻을 수 있으며, 외부 라�
 
 <img width="400" alt="유클리드" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/2890bdbb-9fb4-4d54-9571-0416cf34702f">
 
-### 색상의 유사성을 계산
+### 2. 색상의 유사성을 계산
 
 세가지 방법 중 가장 정확성이 높고, 색상의 왜곡이 적은 유클리드 거리 공식을 사용했습니다.
 <br />
@@ -95,13 +107,10 @@ const calculateDistance = (rgb1, rgb2) => {
 ```
 
 유클리드 거리 공식을 이용해서 RGB 색상 공간에서 두 색상 사이의 거리를 비교해서 가장 유사한 색을 찾을 수 있었습니다.
-
 <br />
 <br />
 
-# 2. 효율적으로 DB를 탐색할 수 있을까?
-
-## 2-1. 부분 탐색으로도 정확한 조회가 가능하도록 커스텀 탐색 로직 구현
+## 1-2. 부분 탐색만으로 조회하는 커스텀 로직 구현
 
 클라이언트에서 보낸 색상과 가장 가까운 색상을 찾기 위해서 DB 전체를 탐색하는 것은 비효율적일 것입니다.
 <br />
@@ -131,7 +140,7 @@ R, G, B를 각각 몇 개의 구역으로 나눌지 판단하기 위해 RGB 3차
 
 <br />
 
-## 2-2. 정확성을 위한 탐색 : 인접한 구역을 포함하기
+### 1) 정확성을 위한 탐색 : 인접한 구역을 포함하기
 
 ### 탐색 속도 감소 vs 탐색 결과의 정확성
 
@@ -150,7 +159,7 @@ DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표
 <br />
 <br />
 
-### 인접한 구역의 갯수
+### 2) 인접한 구역의 갯수
 
 아래의 그림과 같이, 한 구역을 포함한 인접 구역의 갯수는 총 27개입니다.
 
@@ -169,13 +178,13 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 <br />
 <br />
 
-# 3. 탐색 로직 최적화하기
+## 1-3. 자료구조를 적용해서 탐색 로직의 일관성을 향상시키기
 
-## 3-1. 기존 탐색 로직의 문제점
+### 1. 기존 탐색 로직의 문제점
 
 앞서 구현했던 커스텀 탐색 로직 방식에는 두가지 문제점이 있었습니다.
 
-### 1. 사진을 더 많이 추가하게 되면 구역을 세분화 해야한다
+### 1) 사진을 더 많이 추가하게 되면 구역을 세분화 해야한다
 
 6등분으로 나누었을 경우에는 27개의 구역 내에 있는 사진이 많지 않습니다. 따라서 사진을 추가해도 탐색 시간에 큰 차이는 없습니다.
 
@@ -183,7 +192,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 이렇게 많은 사진이 추가되는 경우 그때 마다 구역의 갯수를 알맞게 나누고, 다시 구역에 따라 사진을 분류해야합니다. 연산 횟수 최적화를 하기 위해서 추가적인 분류를 해야하므로 연산 비용이 높습니다.
 
-### 2. 색상에 따라 사진 탐색 시간이 불균일하다
+### 2) 색상에 따라 사진 탐색 시간이 불균일하다
 
 아래 3d 산점도에 표시한 영역들을 보면 분포가 일정하지 않아 상대적으로 밀도가 높은 구역과 낮은 구역이 존재합니다.
 
@@ -199,7 +208,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 <br />
 
-## 3-2. 자료구조를 적용해서 탐색의 일관성을 높인다.
+### 2. 자료구조를 적용해서 탐색의 일관성을 높인다.
 
 커스텀 탐색 로직을 사용하지 않고도, MongoDB 전체를 다 탐색하지 않고 정확하고 일관되게 탐색할 수 있는 방법을 찾아보았습니다.
 <br/>
@@ -239,14 +248,14 @@ k-d tree 자료구조를 이용한 방법으로 로직을 변경한 결과 다�
 
 <br />
 
-## 3-3. 외부 라이브러리 없이 K-D Tree 자료구조 구현하기
+### 3. 외부 라이브러리 없이 K-D Tree 자료구조 구현하기
 
 k-d tree 자료구조를 적용하도록 하는 라이브러리가 존재합니다(KDBush, kdtree 등) <br />
 외부 라이브러리를 사용해서 자료구조를 적용하는 대신, 직접 자료구조를 구현해 보았습니다.
 
 [전체 코드](https://github.com/NayeongK/objecthorizon-server/blob/main/utils/kd-tree.js)
 
-### 1.k-d tree 구현하기
+### 1) k-d tree 구현하기
 
 ```javascript
 function buildKDTree(points, depth = 0) {
@@ -273,7 +282,7 @@ function buildKDTree(points, depth = 0) {
 
 <br/>
 
-### 2. 가장 가까운 원소 찾기
+### 2) 가장 가까운 원소 찾기
 
 ```javascript
 function closestPoint(node, point, best = null) {
@@ -310,28 +319,285 @@ function closestPoint(node, point, best = null) {
 <br />
 <br />
 
-# 4. 부드러운 이미지 확대 효과
+# 2. 이미지를 효율적으로 저장하고 요청하기
 
-## 4-1. 어떻게 사진을 자연스럽게 확대할까?
+## 2-1. 자동화 스크립트를 이용해 저장하기
 
-### throttle과 requestAnimationFrame
+### 사진의 색상을 어떻게 추출할까?
+
+줌 이후에 나오는 사진을 자연스럽게 느끼기 위해서는 색상의 유사성이 중요하다는 생각이 들었습니다.
+<br />
+하지만 이미지에는 많은 픽셀과 색상들이 존재합니다.
+사진 전체의 수 많은 픽셀중 어떤 픽셀을 기준으로 대표 색상을 선택해야 다음 사진의 색상이 유사하다고 느낄 수 있을 지 고민했습니다.
+
+1. 사진의 `전체`의 픽셀 중 가장 빈도가 높은 색상
+
+2. 사진의 `배경`의 픽셀 중 가장 빈도가 높은 색상
+
+<img width="300" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
+
+위 그림을 보았을 때, 사진 전체에서 빈도가 높은 색상을 기준으로 하는 것 보다, 배경색이 같은 경우의 색상 변화를 더 자연스럽게 느낀다는 판단이 들었습니다. 따라서 배경의 색상 중 가장 많은 색상을 기준으로 대표 색상을 결정하는 방법을 선택했습니다.
+
+가장자리의 픽셀값을 사용해서 가장 빈도가 높은 색상을 대표 색상으로 추출하는 로직은 아래와 같습니다
+
+<details>
+<summary>가장자리 픽셀 추출 로직</summary>
+
+```javascipt
+const getDominantBackgroundColor = function (canvas) {
+  const ctx = canvas.getContext("2d");
+  const edgePixels = [];
+  const width = canvas.width;
+  const height = canvas.height;
+
+  for (let x = 0; x < width; x++) {
+    edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
+    edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
+  }
+
+  for (let y = 0; y < height; y++) {
+    edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
+    edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
+  }
+
+  const colorCounts = {};
+
+  edgePixels.forEach((pixel) => {
+    const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
+    if (!colorCounts[key]) {
+      colorCounts[key] = 0;
+    }
+    colorCounts[key]++;
+  });
+
+  let dominantColor = null;
+  let maxCount = 0;
+
+  Object.keys(colorCounts).forEach((key) => {
+    if (colorCounts[key] > maxCount) {
+      dominantColor = key;
+      maxCount = colorCounts[key];
+    }
+  });
+
+  return dominantColor ? dominantColor.split("-").map(Number) : null;
+};
+```
+
+</details>
+<br />
+
+## 2-2. 중복 요청을 방지하기
+
+### 1. 다음 이미지를 미리 요청하기
+
+사물의 지평선은, 일정 비율 이상으로 이미지를 확대할 때, 중심 위치의 색상을 추출하고, 추출한 색상을 서버에 전송하여 가장 가까운 색상을 가진 이미지를 요청합니다.
+
+이 기능을 구현하기 위해서 아래와 같은 이유로, 다음 이미지를 미리 요청할 필요가 있었습니다.
+
+#### 1) 비동기 렌더링 딜레이를 고려하여
+
+이미지를 확대하기 위해 새로운 이미지를 서버에서 요청하는 동안, 사용자는 빈 화면을 보게 됩니다. 이러한 딜레이는 사용자 경험을 저하시킬 수 있으며, 사용자가 대기하는 동안 불편함을 느낄 수 있습니다.
+
+#### 2) 색상 일치성을 고려하여
+
+이미지를 크게 확대하면 이미지의 중심과 배경이 모두 비슷한 색상을 띄게 됩니다. 실제로 600배 확대한 경우, 대부분의 색상이 유사한 계열의 색상으로 구성되어 있음을 확인했습니다. 따라서 사용자 경험을 향상시키기 위해 600배 확대 시점에서, 다음 이미지를 미리 요청하는 것이 적절하다고 판단하였습니다.
+
+<br />
+<img width="500" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4e0baea9-90a2-4b54-bcae-8117a824c613">
+<br />
+
+이미지를 600배 확대하는 시점에서 미리 다음 이미지를 요청함으로써, 실제 다음 이미지로 전환되기 전인 2000배 확대까지의 시간 동안 fetch 작업에 여유 시간을 확보할 수 있습니다. 이렇게 함으로써 이미지 전환이 자연스럽고 빠르게 이루어질 수 있었습니다.
+
+### 2. 중복 요청을 막기
+
+사용자의 터치패드의 이벤트를 이용해서 확대 비율을 계산하게 됩니다.
+
+#### 1) 줌 계산 로직
+
+```javascript
+let scale = -e.deltaY * 0.01;
+let currentZoom = viewState.zoom;
+let newZoom = currentZoom * (1 + scale);
+```
+
+`scale`은 사용자의 마우스 휠 이벤트(e.deltaY)에 따라서, 확대/축소 정도를 계산합니다.
+`currentZoom`은 현재의 확대/축소 정도를 나타내며, 이전 상태의 값을 의미합니다.
+`newZoom`에 scale 된 정도를 곱하기 위해 1 + scale을 곱해주면, 새로운 확대/축소 정도를 계산할 수 있습니다. 사용자가 마우스의 휠을 움직일 때마다 이전 정도에 누적된 값을 얻을 수 있습니다.
+
+#### 2) 600배 이상일때 요청하기
+
+따라서 zoom은 대부분 정수가 아닌 소수점을 가진 실수로 계산되고, 정확히 600이 되는 순간을 기준으로 한다면 대부분의 경우 서버에 요청을 보내지 못하게 됩니다.
+이를 해결하기 위해 sentColor 변수를 사용했습니다. 요청 유무를 boolean으로 상태값으로 관리하여, zoom이 600을 초과하면서도 아직 요청을 보내지 않은 경우에만 요청할 수 있도록 구현했습니다.
+
+```javascript
+if (newZoom > 600 && !sentColor) {
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext("2d");
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const centerColor = ctx.getImageData(centerX, centerY, 1, 1).data;
+
+  async function fetchNextImage() {
+    const nextImage = await fetchClosestBackgroundImage(centerColor);
+    if (nextImage && nextImage.url) {
+      setImages((currentImages) => {
+        const updatedImages = [...currentImages, nextImage.url];
+        return updatedImages;
+      });
+      setViewState((currentViewState) => ({
+        imageIndex: images.length,
+        zoom: 1,
+      }));
+    }
+  }
+  fetchNextImage();
+  setSentColor(true);
+}
+```
+
+### 3. 이미지를 캐싱해서 중복 요청을 방지하기
+
+#### 1) 이미지 객체란?
+
+Canvas API를 이용해서 이미지를 렌더링하기 위해서는 이미지 데이터가 필요합니다. 이때 Image 객체를 사용합니다. Image 객체는 웹에서 이미지를 표현하는 표준적인 방법으로, 브라우저가 이미지 데이터를 로드하고 렌더링할 수 있게 합니다.
+
+웹 애플리케이션에서 이미지를 로드하는 과정은 비동기적입니다. 즉, 이미지 로딩이 시작되고 완료되기까지 다른 코드의 실행이 중단되지 않습니다. 이러한 비동기적인 특성을 관리하기 위해 Image 객체가 사용됩니다.
+
+Image 객체를 생성하고 src 속성에 URL을 할당하면, 이때 브라우저는 해당 URL로부터 이미지 데이터를 불러오기 위한 HTTP 요청을 시작합니다. 즉, 브라우저는 해당 URL로부터 이미지를 로드하기 시작합니다. 이 과정은 비동기작업이며, 이미지 크기나 네트워크 속도에 따라 로드 시간이 달라질 수 있습니다.
+
+이미지가 완전히 로드되었을 때 작업을 수행하기 위해, Image 객체의 load 이벤트 리스너를 사용할 수 있습니다. image.addEventListener("load", callback)을 통해 이미지 로딩이 완료되었을 때 호출될 콜백 함수를 설정할 수 있습니다. 이를 통해 이미지가 완전히 로드된 후에 캔버스에 그릴 수 있습니다
+
+#### 2) 이미지를 캐싱하기
+
+이와 같이 Image 객체의 src 속성에 URL을 할당하는 것은 매번 이미지를 중복으로 로드 하는 것과 같습니다. 기존 useEffect내의 의존성 값인 image나 zoom이 바뀔 때마다 이 할당문이 실행이 된다면, 이미지가 바뀌거나 확대 정도가 바뀔 때 마다 새로운 네트워크 요청이 발생하게 됩니다.
+
+<img width="550" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/f7686e7b-697d-4a73-8afd-02562f08f729">
+
+이미지와 확대 정도를 함께 고려해서 캔버스에 그리고 이를 같은 useEffect내의 의존성 값으로 다루다보니, 확대가 되었을 때 이미지 요청이 중복되는 현상이 발생했습니다.
+
+위 사진은 performance 탭에서 네트워크 요청을 확인한 결과 입니다. 녹색으로 표시 된 부분이 이미지 객체에 url을 할당하면서 일어나는 네트워크 요청이었습니다. 이렇게 같은 사진 내에서도 중복으로 요청이 발생하는 것을 확인할 수 있었습니다.
+
+이를 해결하기 위해서, 이미 불러온 이미지가 있는지 확인한 후, 이미 존재하면 네트워크 요청을 하지 않고 메모리에 캐시된 이미지를 사용했습니다. 즉, 이미 불러온 이미지의 참조를 저장한 다음, 캐시된 이미지가 있으면 재사용하여 동일한 이미지에 대한 중복 요청을 방지했습니다.
+
+이 방법을 통해 컴포넌트가 재렌더링 될 때마다 발생할 수 있는 불필요한 네트워크 요청을 효과적으로 줄일 수 있습니다. useEffect 훅이 의존성 배열에 있는 이미지와 줌이 변경함에 따라 호출이 되더라도, 이미 로드된 이미지는 새로운 HTTP 요청을 하지 않아 불필요한 네트워크 트래픽을 줄이고 자연스러운 이미지 렌더링에도 도움이 됩니다.
+<br />
+
+<details>
+<summary>코드 구현 내용</summary>
+
+```javascript
+useEffect(() => {
+  function loadImage(imageIndex) {
+    const src = images[imageIndex];
+    if (!imageElements[src]) {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.src = src;
+      image.addEventListener("load", () => {
+        setImageElements((prev) => ({ ...prev, [src]: image }));
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        drawImage(canvas, ctx, image, viewState.zoom);
+      });
+    } else {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      drawImage(canvas, ctx, imageElements[src], viewState.zoom);
+    }
+  }
+
+  if (images.length > 0) {
+    loadImage(viewState.imageIndex);
+  }
+}, [mousePosition, images, viewState, imageElements]);
+```
+
+</details>
+<br />
+<img width="550" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/5f61b1ff-b1b6-4bb6-9bbd-234b170df7cc">
+
+변경한 로직으로 performance 탭을 확인한 결과, 네트워크 요청(녹색 막대)이 중복해서 일어나지 않도록 변경되었습니다.
+
+# 3. 이미지 렌더링 최적화하기
+
+## 3-1. 각기 다른 크기의 이미지를 화면에 채우기
+
+## 3-2. 부드러운 이미지 확대 효과 구현하기
+
+> 사용자의 줌 모션에 따라 `휠 이벤트`가 발생합니다. <br />
+> 이 이벤트에 따라 이미지가 부드럽게 확대 또는 축소 되어야합니다. <br />
+> 줌으로 발생하는 이벤트와 이미지의 확대 타이밍을 조절해서, 이미지를 자연스럽게 확대하는 방법을 고민 했습니다.
+
+### 1. throttle과 requestAnimationFrame
+
+#### 1) throttle을 이용한 이벤트 처리
+
+`throttle`이란, 이벤트를 일정 주기로 제한해서 처리할 수 있도록 하는 방법입니다. <br />
+처음에는 사용자의 줌인 모션으로 인해 발생하는 휠 이벤트를 throttle을 이용하여 처리하고 있었습니다. <br />
+그러나, throttle을 사용하더라도 사용자의 확대 모션으로 인해 여러 휠 이벤트가 빠르게 발생했습니다. <br />
+이로 인해 각각의 휠 이벤트가 중첩되어 발생하고, 이로 인해 이미지의 확대 효과가 부자연스러운 문제가 발생했습니다.
 
 ![throttle loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/2e6b01a0-616b-4b24-802d-dfff9af23607)
 <br />
-throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스럽거나 끊기는 현상이 발생합니다.
+이렇게 throttle로 구현된 줌 렌더링의 경우, 화면 렌더링이 부자연스럽거나 끊기는 현상이 발생합니다.
 <br />
 [해당 코드](https://github.com/NayeongK/objecthorizon-client/blob/2857b1694e8c1be699a834696b7ebca565f4d5b1/src/components/ImageLayout/index.jsx#L134)
+<br />
+
+#### 2) requestAnimationFrame을 이용한 개선
+
+`requestAnimationFrame`은 브라우저의 다음 렌더링 주기 전에 콜백 함수를 실행하는 방법입니다. <br />
+휠 이벤트와 이미지 확대를 브라우저의 렌더링 주기와 동기화하여 처리할 수 있습니다.
+<br /> requestAnimationFrame을 이용해서 줌 렌더링의 주기와 브라우저 렌더링 주기를 맞추어, 사용자의 확대 모션에 따라 이미지가 자연스럽게 확대될 수 있었습니다.
 <br />
 <br />
 ![rAF loop](https://github.com/NayeongK/objecthorizon-client/assets/80331804/dad753cd-5906-4bb1-927f-b3d4b7ce2fac)
 <br />
-requestAnimationFrame으로 구현된 줌 렌더링의 경우, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
+requestAnimationFrame으로, 줌에 따른 이미지 확대가 자연스럽게 렌더링 됩니다.
+
+### 2. requestAnimationFrame 최적화하기
+
+requestAnimationFrame을 사용하면서도, 더 부드러운 줌 렌더링을 위해서 최적화를 진행했습니다.
+
+#### 1) animation frame 이란?
+
+애니메이션 프레임은 브라우저의 내부적인 큐로, 일반적인 비동기 작업(Task Queue)과 별개로 관리됩니다. 이 큐에는 requestAnimationFrame 함수를 통해 등록한 콜백 함수들이 담겨 있습니다.
+<br />
+<br />
+requestAnimationFrame을 통해 등록한 콜백 함수들은 순서대로 실행되며 중첩되지 않습니다. 또한, 이전에 예약된 프레임을 취소하거나 새로운 프레임을 예약할 수 있어서 제어가 가능합니다. 부드러운 애니메이션 및 사용자 입력 처리에 유용합니다.
+
+#### 2) frame 이란?
+
+브라우저는 1초당 몇 개씩의 프레임(frame per second: fps, hz, 주사율)을 그려 화면을 표시합니다. 브라우저는 모니터의 주사율에 따라 프레임을 표현합니다.
+
+#### 3) frame id란?
+
+requestAnimationFrame 함수를 호출하면 요청마다 고유한 아이디 값이 반환 됩니다.
+이 아이디를 이용해서 예약된 프레임을 제거할 수 있습니다. 제거하는 경우 cancelAnimationFrame을 사용합니다.
+
+```javascript
+function handleWheel(event) {
+  if (animationFrameId !== null) {
+    window.cancelAnimationFrame(animationFrameId);
+  }
+  const id = window.requestAnimationFrame(() => {
+    handleWheelEvent(event);
+  });
+  setAnimationFrameId(id);
+}
+```
+
+휠 이벤트는 많은 이벤트가 발생하기 때문에 동일한 이벤트에 requestAnimationFrame를 여러번 호출하지 않도록 하는 것이 필요합니다. 애니메이션 프레임이 실행중이지 않을 때에만, 코드가 실행됩니다.
 
 <br />
 
-## 4-2. 확대 지점을 어떻게 계산할까?
+## 3-3. 마우스 위치를 기준으로 확대하기
 
-### 마우스가 위치한 사진의 지점이 확대되도록 하는 방법
+### 1. 확대 지점을 어떻게 계산할까?
+
+### 1) 마우스가 위치한 사진의 지점이 확대되도록 하는 방법
 
 사용자가 마우스를 이용해서 확대할 지점을 선택 수 있도록 구현했습니다.
 마우스 방향으로 자연스럽게 확대되도록 하기 위해서는 마우스의 위치가 화면에 중앙에 오는 것이 아니라, 마우스가 놓여진 지점을 향해 자연스럽게 확대되는 방식이 자연스럽다고 생각했습니다. 이 기능을 구현하기 위해서 여러 단계로 나누어 작업했습니다.
@@ -495,7 +761,7 @@ startY = (canvasHeight - drawHeight) / 2 - offsetY
 
 </details>
 
-## 4-3. 축소 시 이미지 위치를 조정하기
+### 2) 축소 시 이미지 위치를 조정하기
 
 마우스의 위치를 기준으로 캔버스에 그려지는 로직으로 인해, 축소시에는 이미지의 위치가 틀어지는 현상이 발생했습니다.
 <br />
@@ -554,76 +820,7 @@ zoomValue가 1이하일 때는 화면의 중앙에 고정되도록 해서 축소
 <br />
 <br />
 
-# 5. 자동화 스크립트로 사진 색상을 추출하고 저장
-
-## 5-1. 사진의 색상을 어떻게 추출할까?
-
-줌 이후에 나오는 사진을 자연스럽게 느끼기 위해서는 색상의 유사성이 중요하다는 생각이 들었습니다.
-<br />
-하지만 이미지에는 많은 픽셀과 색상들이 존재합니다.
-사진 전체의 수 많은 픽셀중 어떤 픽셀을 기준으로 대표 색상을 선택해야 다음 사진의 색상이 유사하다고 느낄 수 있을 지 고민했습니다.
-
-1. 사진의 `전체`의 픽셀 중 가장 빈도가 높은 색상
-
-2. 사진의 `배경`의 픽셀 중 가장 빈도가 높은 색상
-
-<img width="300" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
-
-위 그림을 보았을 때, 사진 전체에서 빈도가 높은 색상을 기준으로 하는 것 보다, 배경색이 같은 경우의 색상 변화를 더 자연스럽게 느낀다는 판단이 들었습니다. 따라서 배경의 색상 중 가장 많은 색상을 기준으로 대표 색상을 결정하는 방법을 선택했습니다.
-
-가장자리의 픽셀값을 사용해서 가장 빈도가 높은 색상을 대표 색상으로 추출하는 로직은 아래와 같습니다
-
-<details>
-<summary>가장자리 픽셀 추출 로직</summary>
-
-```javascipt
-const getDominantBackgroundColor = function (canvas) {
-  const ctx = canvas.getContext("2d");
-  const edgePixels = [];
-  const width = canvas.width;
-  const height = canvas.height;
-
-  for (let x = 0; x < width; x++) {
-    edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
-    edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
-  }
-
-  for (let y = 0; y < height; y++) {
-    edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
-    edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
-  }
-
-  const colorCounts = {};
-
-  edgePixels.forEach((pixel) => {
-    const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
-    if (!colorCounts[key]) {
-      colorCounts[key] = 0;
-    }
-    colorCounts[key]++;
-  });
-
-  let dominantColor = null;
-  let maxCount = 0;
-
-  Object.keys(colorCounts).forEach((key) => {
-    if (colorCounts[key] > maxCount) {
-      dominantColor = key;
-      maxCount = colorCounts[key];
-    }
-  });
-
-  return dominantColor ? dominantColor.split("-").map(Number) : null;
-};
-```
-
-</details>
-<br />
-<br />
-
-# 6. 크로스 브라우징 이슈
-
-## 6-1. Safari에서 Wheel 이벤트가 인식되지 않는 문제
+## 3-4. 크로스 브라우징 이슈 해결
 
 Safari에서는 Wheel 이벤트를 인식하지 못하는 문제가 있었습니다.
 
@@ -663,7 +860,7 @@ useEffect(() => {
 
 프로젝트 기간 : 23.08.07 - 23.09.07(총 31일, 기획 및 설계 8일, 개발 및 마무리 23일)
 
-## **Tech Stack**
+# Tech Stack
 
 **Client**:
 <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white">
