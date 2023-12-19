@@ -1,4 +1,4 @@
-# **Object Horizon**
+# 🌎 Object Horizon
 
 사물의 지평선은 줌으로 확대한 지점과 유사한 색을 가진 사진을 무한히 렌더링하는 웹 앱입니다
 
@@ -8,8 +8,9 @@
 <br/>
 ![preview2](https://github.com/NayeongK/objecthorizon-client/assets/80331804/d33de3d8-3c73-46bb-b3a5-c41bcd491752)
 <br />
+<br />
 
-# Feature
+# ✅ Feature
 
 <img width="300" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/23c30fec-162b-4d3a-af2b-86cbe20c48aa">
 
@@ -21,39 +22,37 @@
 <br/> 4.줌 아웃 모션을 하면 사진이 축소됩니다
 <br /> 5.일정 비율 이상 축소 되면, 이전 사진이 역순으로 보여집니다
 
-# Table of Contents
+<br />
 
-[ObjectHorizon](#object-horizon)
+# 📋 Table of Contents
 
-[Feature](#feature)
+[🌎 ObjectHorizon](#object-horizon)
 
-[Challenge](#💡-challenges)
+[✅ Feature](#feature)
 
-[1. DB 탐색 로직의 구현과 최적화 과정](#1-db-탐색-로직의-구현과-최적화-과정)
+[💡 Challenges](#💡-challenges)
 
-- [1-1. 색상의 유사성을 판단하기](#1-1-색상의-유사성을-판단하기)
-- [1-2. 부분 탐색만으로 조회하는 커스텀 로직 구현](#1-2-부분-탐색만으로-조회하는-커스텀-로직-구현)
-- [1-3. 자료구조를 적용해 탐색 로직의 일관성을 향상시키기](#1-3-자료구조를-적용해서-탐색-로직의-일관성을-향상시키기)
+- [1. DB 탐색 로직의 구현과 최적화 과정](#1-db-탐색-로직의-구현과-최적화-과정)
 
----
+  - [1-1. 색상의 유사성을 판단하기](#1-1-색상의-유사성을-판단하기)
+  - [1-2. 부분 탐색만으로 조회하는 커스텀 로직 구현](#1-2-부분-탐색만으로-조회하는-커스텀-로직-구현)
+  - [1-3. K-D Tree 자료구조를 적용해 탐색 로직의 일관성을 향상시키기](#1-3-k-d-tree-자료구조를-적용해서-탐색-로직의-일관성을-향상시키기)
 
-[2. 이미지를 효율적으로 저장하고 요청하기](#2-이미지를-효율적으로-저장하고-요청하기)
+- [2. 이미지를 효율적으로 저장하고 요청하기](#2-이미지를-효율적으로-저장하고-요청하기)
 
-- [2-1. 자동화 스크립트를 이용해 저장하기](#2-1-자동화-스크립트를-이용해-저장하기)
-- [2-2. 중복 요청을 방지하기](#2-2-중복-요청을-방지하기)
+  - [2-1. 자동화 스크립트를 이용해 저장하기](#2-1-자동화-스크립트를-이용해-저장하기)
+  - [2-2. 중복 요청을 방지하기](#2-2-중복-요청을-방지하기)
 
----
+- [3. 이미지 렌더링 최적화하기](#3-이미지-렌더링-최적화하기)
+  - [3-1. 부드러운 이미지 확대 효과 구현하기](#3-2-부드러운-이미지-확대-효과-구현하기)
+  - [3-2. 마우스의 위치를 향해 확대하는 방법](#3-3-마우스-위치를-기준으로-확대하기)
+  - [3-3. 크로스 브라우징 이슈 해결](#3-4-크로스-브라우징-이슈-해결)
 
-[3. 이미지 렌더링 최적화하기](#3-이미지-렌더링-최적화하기)
+[⏰ TimeLine](#timeline)
 
-- [3-1. 각기 다른 크기의 이미지를 화면에 채우기](#3-1-각기-다른-크기의-이미지를-화면에-채우기)
-- [3-2. 부드러운 이미지 확대 효과 구현하기](#3-2-부드러운-이미지-확대-효과-구현하기)
-- [3-3. 마우스의 위치를 향해 확대하는 방법](#3-3-마우스-위치를-기준으로-확대하기)
-- [3-4. 크로스 브라우징 이슈 해결](#3-4-크로스-브라우징-이슈-해결)
+[⚙️ TechStack](#tech-stack)
 
-[TimeLine](#timeline)
-
-[TechStack](#tech-stack)
+<br />
 
 # 💡 Challenges
 
@@ -159,7 +158,7 @@ DB에 저장된 사진의 양이 678개로 많지 않아 정교한 색상을 표
 <br />
 <br />
 
-### 2) 인접한 구역의 갯수
+### 2) 인접한 구역을 계산하고 구역 내를 탐색하기
 
 아래의 그림과 같이, 한 구역을 포함한 인접 구역의 갯수는 총 27개입니다.
 
@@ -178,7 +177,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 <br />
 <br />
 
-## 1-3. 자료구조를 적용해서 탐색 로직의 일관성을 향상시키기
+## 1-3. K-D Tree 자료구조를 적용해서 탐색 로직의 일관성을 향상시키기
 
 ### 1. 기존 탐색 로직의 문제점
 
@@ -208,7 +207,7 @@ DB 전체(216개의 구역)을 모두 탐색하지 않고 최대 27개의 구역
 
 <br />
 
-### 2. 자료구조를 적용해서 탐색의 일관성을 높인다.
+### 2. K-D Tree 자료구조를 적용해서 탐색의 일관성을 높인다.
 
 커스텀 탐색 로직을 사용하지 않고도, MongoDB 전체를 다 탐색하지 않고 정확하고 일관되게 탐색할 수 있는 방법을 찾아보았습니다.
 <br/>
@@ -219,6 +218,7 @@ k-d tree 자료구조는 고차원 공간에서 가까운 이웃을 빠르게 �
 ### k-d tree의 구현
 
 k-d tree는 각 노드가 k차원의 한 점을 나타내며, 트리의 각 단계에서 한 차원에 대해 노드를 분할하여 구축됩니다.k-d tree는 효율적인 탐색을 위해 공간을 이진 탐색 트리와 유사한 방법으로 분할합니다.
+<br />
 <img width="234" alt="kdtree" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/01a3b424-36da-4e2d-b3ee-177ce1e3871d">
 
 이 경우에는 R,G,B 각각을 축으로 사용하여 3차원 k-d tree를 만듭니다.
@@ -323,18 +323,19 @@ function closestPoint(node, point, best = null) {
 
 ## 2-1. 자동화 스크립트를 이용해 저장하기
 
-### 사진의 색상을 어떻게 추출할까?
+### 이미지의 어떤 색상을 어떻게 추출할까?
 
-줌 이후에 나오는 사진을 자연스럽게 느끼기 위해서는 색상의 유사성이 중요하다는 생각이 들었습니다.
+줌 이후에 나오는 이미지를 자연스럽게 느끼기 위해서는, 다음 이미지의 색상 유사성이 중요하다는 생각이 들었습니다.
 <br />
 하지만 이미지에는 많은 픽셀과 색상들이 존재합니다.
-사진 전체의 수 많은 픽셀중 어떤 픽셀을 기준으로 대표 색상을 선택해야 다음 사진의 색상이 유사하다고 느낄 수 있을 지 고민했습니다.
+이미지 전체의 수 많은 픽셀중 어떤 픽셀을 기준으로 대표 색상을 선택해야 다음 사진의 색상이 유사하다고 느낄 수 있을 지 고민했습니다.
 
-1. 사진의 `전체`의 픽셀 중 가장 빈도가 높은 색상
+1)이미지의 `전체`의 픽셀 중 가장 빈도가 높은 색상
+<br /> 2)이미지의 `배경`의 픽셀 중 가장 빈도가 높은 색상
+<br />
 
-2. 사진의 `배경`의 픽셀 중 가장 빈도가 높은 색상
-
-<img width="300" alt="유사한 색상" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4ac6b082-83ae-4416-a24a-2f14d2d9ff47">
+<img width="600" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/2546275b-0177-43a4-9e57-1fd0bc6c13e0">
+<br />
 
 위 그림을 보았을 때, 사진 전체에서 빈도가 높은 색상을 기준으로 하는 것 보다, 배경색이 같은 경우의 색상 변화를 더 자연스럽게 느낀다는 판단이 들었습니다. 따라서 배경의 색상 중 가장 많은 색상을 기준으로 대표 색상을 결정하는 방법을 선택했습니다.
 
@@ -345,51 +346,59 @@ function closestPoint(node, point, best = null) {
 
 ```javascipt
 const getDominantBackgroundColor = function (canvas) {
-  const ctx = canvas.getContext("2d");
-  const edgePixels = [];
-  const width = canvas.width;
-  const height = canvas.height;
+const ctx = canvas.getContext("2d");
+const edgePixels = [];
+const width = canvas.width;
+const height = canvas.height;
 
-  for (let x = 0; x < width; x++) {
-    edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
-    edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
-  }
+for (let x = 0; x < width; x++) {
+edgePixels.push(ctx.getImageData(x, 0, 1, 1).data);
+edgePixels.push(ctx.getImageData(x, height - 1, 1, 1).data);
+}
 
-  for (let y = 0; y < height; y++) {
-    edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
-    edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
-  }
+for (let y = 0; y < height; y++) {
+edgePixels.push(ctx.getImageData(0, y, 1, 1).data);
+edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
+}
 
-  const colorCounts = {};
+const colorCounts = {};
 
-  edgePixels.forEach((pixel) => {
-    const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
-    if (!colorCounts[key]) {
-      colorCounts[key] = 0;
-    }
-    colorCounts[key]++;
-  });
+edgePixels.forEach((pixel) => {
+const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
+if (!colorCounts[key]) {
+colorCounts[key] = 0;
+}
+colorCounts[key]++;
+});
 
-  let dominantColor = null;
-  let maxCount = 0;
+let dominantColor = null;
+let maxCount = 0;
 
-  Object.keys(colorCounts).forEach((key) => {
-    if (colorCounts[key] > maxCount) {
-      dominantColor = key;
-      maxCount = colorCounts[key];
-    }
-  });
+Object.keys(colorCounts).forEach((key) => {
+if (colorCounts[key] > maxCount) {
+dominantColor = key;
+maxCount = colorCounts[key];
+}
+});
 
-  return dominantColor ? dominantColor.split("-").map(Number) : null;
+return dominantColor ? dominantColor.split("-").map(Number) : null;
 };
+
 ```
 
 </details>
+
 <br />
+이렇게 추출한 가장자리의 색상을 서버를 통해 DB에 저장하게 됩니다.
+과정의 도식은 아래와 같습니다.
+<br />
+<img width="500" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/d6011c40-be36-4cb3-8b22-80a3ad46cb29">
 
 ## 2-2. 중복 요청을 방지하기
 
-### 1. 다음 이미지를 미리 요청하기
+### 1. preloading에서의 중복 요청을 방지하기
+
+### 1) 다음 이미지를 미리 요청하기
 
 사물의 지평선은, 일정 비율 이상으로 이미지를 확대할 때, 중심 위치의 색상을 추출하고, 추출한 색상을 서버에 전송하여 가장 가까운 색상을 가진 이미지를 요청합니다.
 
@@ -404,12 +413,12 @@ const getDominantBackgroundColor = function (canvas) {
 이미지를 크게 확대하면 이미지의 중심과 배경이 모두 비슷한 색상을 띄게 됩니다. 실제로 600배 확대한 경우, 대부분의 색상이 유사한 계열의 색상으로 구성되어 있음을 확인했습니다. 따라서 사용자 경험을 향상시키기 위해 600배 확대 시점에서, 다음 이미지를 미리 요청하는 것이 적절하다고 판단하였습니다.
 
 <br />
-<img width="500" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/4e0baea9-90a2-4b54-bcae-8117a824c613">
+<img width="630" alt="image" src="https://github.com/NayeongK/objecthorizon-client/assets/80331804/7c017518-221b-4b7b-9232-9031b5a243e1">
 <br />
 
 이미지를 600배 확대하는 시점에서 미리 다음 이미지를 요청함으로써, 실제 다음 이미지로 전환되기 전인 2000배 확대까지의 시간 동안 fetch 작업에 여유 시간을 확보할 수 있습니다. 이렇게 함으로써 이미지 전환이 자연스럽고 빠르게 이루어질 수 있었습니다.
 
-### 2. 중복 요청을 막기
+### 2) preloading에서의 중복 요청을 방지하기
 
 사용자의 터치패드의 이벤트를 이용해서 확대 비율을 계산하게 됩니다.
 
@@ -457,7 +466,7 @@ if (newZoom > 600 && !sentColor) {
 }
 ```
 
-### 3. 이미지를 캐싱해서 중복 요청을 방지하기
+### 2. 이미지 캐싱을 이용해서 이미지 렌더링 시 중복 요청 방지하기
 
 #### 1) 이미지 객체란?
 
@@ -522,9 +531,7 @@ useEffect(() => {
 
 # 3. 이미지 렌더링 최적화하기
 
-## 3-1. 각기 다른 크기의 이미지를 화면에 채우기
-
-## 3-2. 부드러운 이미지 확대 효과 구현하기
+## 3-1. 부드러운 이미지 확대 효과 구현하기
 
 > 사용자의 줌 모션에 따라 `휠 이벤트`가 발생합니다. <br />
 > 이 이벤트에 따라 이미지가 부드럽게 확대 또는 축소 되어야합니다. <br />
@@ -593,7 +600,7 @@ function handleWheel(event) {
 
 <br />
 
-## 3-3. 마우스 위치를 기준으로 확대하기
+## 3-2. 마우스 위치를 기준으로 확대하기
 
 ### 1. 확대 지점을 어떻게 계산할까?
 
@@ -820,7 +827,7 @@ zoomValue가 1이하일 때는 화면의 중앙에 고정되도록 해서 축소
 <br />
 <br />
 
-## 3-4. 크로스 브라우징 이슈 해결
+## 3-3. 크로스 브라우징 이슈 해결
 
 Safari에서는 Wheel 이벤트를 인식하지 못하는 문제가 있었습니다.
 
@@ -855,12 +862,15 @@ useEffect(() => {
 
 이벤트 위임과 이벤트 버블링을 사용해서, 문서 전체에서 발생하는 휠 이벤트를 관리하는 방식으로 Safari에서의 이벤트 처리 이슈를 해결했습니다.
 <br />
+<br />
 
-# TimeLine
+# ⏰ TimeLine
 
 프로젝트 기간 : 23.08.07 - 23.09.07(총 31일, 기획 및 설계 8일, 개발 및 마무리 23일)
 
-# Tech Stack
+<br />
+
+# ⚙️ Tech Stack
 
 **Client**:
 <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white">

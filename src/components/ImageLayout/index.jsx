@@ -46,7 +46,7 @@ function ImageLayout() {
       nextImage.addEventListener("load", () => {
         setIsLoading(false);
       });
-      nextImage.addEventListener("onerror", () => {
+      nextImage.addEventListener("error", () => {
         setIsLoading(true);
       });
       nextImage.src = images[viewState.imageIndex + 1];
@@ -55,7 +55,7 @@ function ImageLayout() {
 
   function goToNextImage() {
     setViewState((prevState) => ({
-      imageIndex: (prevState.imageIndex + 1) % images.length,
+      imageIndex: prevState.imageIndex + 1,
       zoom: 1,
     }));
   }
@@ -159,9 +159,6 @@ function ImageLayout() {
 
   function handleWheel(e) {
     if (!ticking) {
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId);
-      }
       const id = window.requestAnimationFrame(() => {
         handleWheelEvent(e);
         setTicking(false);
