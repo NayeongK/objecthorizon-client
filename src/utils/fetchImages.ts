@@ -1,4 +1,5 @@
 const { VITE_SERVER_URI } = import.meta.env;
+import { Color } from "../types/color";
 
 export async function fetchAllBackgroundImages() {
   try {
@@ -10,7 +11,7 @@ export async function fetchAllBackgroundImages() {
   }
 }
 
-export async function fetchClosestBackgroundImage(color) {
+export async function fetchClosestBackgroundImage(color: Color) {
   try {
     const data = await fetch(`${VITE_SERVER_URI}/images?color=${color}`);
     const image = await data.json();
