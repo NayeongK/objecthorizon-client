@@ -40,6 +40,7 @@
     "jest-environment-jsdom": "^29.6.2",
     "jest-fetch-mock": "^3.0.3",
     "jest-transform-stub": "^2.0.0",
+    "typescript": "^5.3.3",
     "vite": "^4.4.5"
   }
 }
