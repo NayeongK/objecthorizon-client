@@ -1,5 +1,8 @@
-export function getDominantBackgroundColor(canvas) {
+export function getDominantBackgroundColor(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return null;
+  }
   const edgePixels = [];
   const width = canvas.width;
   const height = canvas.height;
@@ -14,7 +17,7 @@ export function getDominantBackgroundColor(canvas) {
     edgePixels.push(ctx.getImageData(width - 1, y, 1, 1).data);
   }
 
-  const colorCounts = {};
+  const colorCounts: { [key: string]: number } = {};
 
   edgePixels.forEach((pixel) => {
     const key = `${pixel[0]}-${pixel[1]}-${pixel[2]}`;
@@ -34,5 +37,7 @@ export function getDominantBackgroundColor(canvas) {
     }
   });
 
-  return dominantColor ? dominantColor.split("-").map(Number) : null;
+  return dominantColor
+    ? (dominantColor as string).split("-").map(Number)
+    : null;
 }
