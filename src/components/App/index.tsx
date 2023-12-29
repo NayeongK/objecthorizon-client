@@ -11,7 +11,7 @@ function App() {
       <Main>
         <Container>
           <Routes>
-            <Route path="/" exact element={<ImageLayout />} />
+            <Route path="/" element={<ImageLayout />} />
           </Routes>
         </Container>
       </Main>
