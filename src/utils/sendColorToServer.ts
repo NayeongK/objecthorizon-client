@@ -1,6 +1,7 @@
 const { VITE_SERVER_URI } = import.meta.env;
+import { Color } from "../types/color";
 
-export async function sendDominantColorToServer(url, color) {
+export async function sendDominantColorToServer(url: string, color: Color) {
   const response = await fetch(`${VITE_SERVER_URI}/images?initial=true`, {
     method: "POST",
     headers: {
