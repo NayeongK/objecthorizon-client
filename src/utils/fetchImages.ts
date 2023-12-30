@@ -11,7 +11,7 @@ export async function fetchAllBackgroundImages() {
   }
 }
 
-export async function fetchClosestBackgroundImage(color: Color) {
+export async function fetchClosestBackgroundImage(color: Uint8ClampedArray) {
   try {
     const data = await fetch(`${VITE_SERVER_URI}/images?color=${color}`);
     const image = await data.json();

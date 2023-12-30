@@ -5,20 +5,23 @@ import {
 } from "../../utils/fetchImages";
 
 function ImageLayout() {
-  const canvasRef = useRef(null);
-  const [images, setImages] = useState([]);
-  const [imageElements, setImageElements] = useState({});
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [imageElements, setImageElements] = useState<{
+    [key: string]: HTMLImageElement;
+  }>({});
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [viewState, setViewState] = useState({ imageIndex: 0, zoom: 1 });
   const [sentColor, setSentColor] = useState(false);
   const [ticking, setTicking] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [animationFrameId, setAnimationFrameId] = useState(null);
+  const [animationFrameId, setAnimationFrameId] = useState<number | null>(null);
 
   useEffect(() => {
-    function handleDocumentWheel(e) {
-      if (canvasRef.current && canvasRef.current.contains(e.target)) {
-        handleWheelEvent(e);
+    function handleDocumentWheel(event: WheelEvent) {
+      const target = event.target as HTMLElement;
+      if (canvasRef.current && target && canvasRef.current.contains(target)) {
+        handleWheelEvent(event);
       }
     }
 
@@ -67,7 +70,12 @@ function ImageLayout() {
     }));
   }
 
-  function drawImage(canvas, ctx, image, zoomValue) {
+  function drawImage(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement,
+    zoomValue: number,
+  ) {
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
@@ -101,21 +109,21 @@ function ImageLayout() {
     ctx.drawImage(image, startX, startY, drawWidth, drawHeight);
   }
 
-  function handleWheelEvent(e) {
-    let scale = -e.deltaY * 0.01;
+  function handleWheelEvent(event: WheelEvent) {
+    let scale = -event.deltaY * 0.01;
     let currentZoom = viewState.zoom;
     const maxZoom = 2000;
     const minZoom = 0.3;
 
     if (currentZoom * (1 + scale) > maxZoom) {
       goToNextImage();
-      e.preventDefault();
+      event.preventDefault();
       return;
     }
 
     if (currentZoom * (1 + scale) < minZoom) {
       goToPreviousImage();
-      e.preventDefault();
+      event.preventDefault();
       return;
     }
 
@@ -125,42 +133,44 @@ function ImageLayout() {
       ...prevState,
       zoom: newZoom,
     }));
-    e.preventDefault();
+    event.preventDefault();
 
     if (newZoom > 600 && !sentColor) {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const centerColor = ctx.getImageData(centerX, centerY, 1, 1).data;
 
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const centerColor = ctx.getImageData(centerX, centerY, 1, 1).data;
-
-      async function fetchNextImage() {
-        const nextImage = await fetchClosestBackgroundImage(centerColor);
-        if (nextImage && nextImage.url) {
-          setImages((currentImages) => {
-            const updatedImages = [...currentImages, nextImage.url];
-            return updatedImages;
-          });
-          setViewState((currentViewState) => ({
-            imageIndex: images.length,
-            zoom: 1,
-          }));
+          async function fetchNextImage() {
+            const nextImage = await fetchClosestBackgroundImage(centerColor);
+            if (nextImage && nextImage.url) {
+              setImages((currentImages) => {
+                const updatedImages = [...currentImages, nextImage.url];
+                return updatedImages;
+              });
+              setViewState((currentViewState) => ({
+                imageIndex: images.length,
+                zoom: 1,
+              }));
+            }
+          }
+          fetchNextImage();
+          setSentColor(true);
         }
       }
-      fetchNextImage();
-      setSentColor(true);
     }
-
     if (newZoom <= 600) {
       setSentColor(false);
     }
   }
 
-  function handleWheel(e) {
+  function handleWheel(event: WheelEvent) {
     if (!ticking) {
       const id = window.requestAnimationFrame(() => {
-        handleWheelEvent(e);
+        handleWheelEvent(event);
         setTicking(false);
       });
       setAnimationFrameId(id);
@@ -170,25 +180,26 @@ function ImageLayout() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-
-    function handleMouseMove(e) {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    }
-
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("wheel", handleWheel, { passive: true });
-
-    return () => {
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId);
+    if (canvas) {
+      function handleMouseMove(event: MouseEvent) {
+        setMousePosition({ x: event.clientX, y: event.clientY });
       }
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("wheel", handleWheel);
-    };
+
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("wheel", handleWheel, { passive: true });
+
+      return () => {
+        if (animationFrameId !== null) {
+          window.cancelAnimationFrame(animationFrameId);
+        }
+        canvas.removeEventListener("mousemove", handleMouseMove);
+        canvas.removeEventListener("wheel", handleWheel);
+      };
+    }
   }, [viewState.zoom]);
 
   useEffect(() => {
-    function loadImage(imageIndex) {
+    function loadImage(imageIndex: number) {
       const src = images[imageIndex];
       if (!imageElements[src]) {
         const image = new Image();
@@ -197,13 +208,21 @@ function ImageLayout() {
         image.addEventListener("load", () => {
           setImageElements((prev) => ({ ...prev, [src]: image }));
           const canvas = canvasRef.current;
-          const ctx = canvas.getContext("2d");
-          drawImage(canvas, ctx, image, viewState.zoom);
+          if (canvas) {
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              drawImage(canvas, ctx, image, viewState.zoom);
+            }
+          }
         });
       } else {
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        drawImage(canvas, ctx, imageElements[src], viewState.zoom);
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            drawImage(canvas, ctx, imageElements[src], viewState.zoom);
+          }
+        }
       }
     }
 
