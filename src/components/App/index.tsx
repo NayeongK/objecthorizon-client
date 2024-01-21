@@ -1,20 +1,27 @@
 import { Routes, Route } from "react-router-dom";
 import styled from "styled-components";
+import { BrowserView, MobileView } from "react-device-detect";
 
 import ImageLayout from "../ImageLayout";
 import AppHeader from "../AppHeader";
+import Mobile from "../Mobile";
 
 function App() {
   return (
     <>
-      <AppHeader />
-      <Main>
-        <Container>
-          <Routes>
-            <Route path="/" element={<ImageLayout />} />
-          </Routes>
-        </Container>
-      </Main>
+      <BrowserView>
+        <AppHeader />
+        <Main>
+          <Container>
+            <Routes>
+              <Route path="/" element={<ImageLayout />} />
+            </Routes>
+          </Container>
+        </Main>
+      </BrowserView>
+      <MobileView>
+        <Mobile />
+      </MobileView>
     </>
   );
 }
